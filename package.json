@@ -28,5 +28,8 @@
     "webpack": "^1.13.2",
     "webpack-dev-server": "^1.15.0"
   },
-  "repository": "heptahedron/leave-me-alone-npm"
+  "repository": "heptahedron/leave-me-alone-npm",
+  "dependencies": {
+    "babel-runtime": "^6.11.6"
+  }
 }
