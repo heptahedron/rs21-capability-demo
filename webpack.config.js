@@ -1,3 +1,5 @@
+const HtmlWebpackPlugin = require('html-webpack-plugin')
+
 const context = __dirname + '/src',
       entry   = './app',
       path    = __dirname + '/dist',
@@ -14,7 +16,10 @@ module.exports = {
     loaders: [
       { test: /\.js$/,
         loader: 'babel',
-        include: p => { console.log(`path is ${p}`); return false } }
+        include: p => p.startsWith(context) }
     ]
-  }
+  },
+  plugins: [new HtmlWebpackPlugin({
+    title: 'Albuquerque Geographical Data'
+  })]
 }
