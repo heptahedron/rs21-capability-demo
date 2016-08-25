@@ -24,9 +24,13 @@
     "babel-preset-es2015": "^6.13.2",
     "css-loader": "^0.24.0",
     "html-webpack-plugin": "^2.22.0",
+    "json-loader": "^0.5.4",
+    "mapbox-gl": "^0.22.1",
     "style-loader": "^0.13.1",
+    "transform-loader": "^0.2.3",
     "webpack": "^1.13.2",
-    "webpack-dev-server": "^1.15.0"
+    "webpack-dev-server": "^1.15.0",
+    "webworkify-webpack": "^1.1.7"
   },
   "repository": "heptahedron/leave-me-alone-npm",
   "dependencies": {
