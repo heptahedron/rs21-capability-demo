@@ -1,5 +1,5 @@
 import mapboxgl from 'mapbox-gl'
-import './styles/mapbox-gl.css'
+import './styles/vendor/mapbox-gl.css'
 
 import './styles/main.css'
 import appConfig from './app-config.json'

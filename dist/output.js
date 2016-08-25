@@ -50,7 +50,30 @@
 
 	var _mapboxGl2 = _interopRequireDefault(_mapboxGl);
 
+	__webpack_require__(206);
+
+	__webpack_require__(210);
+
+	var _appConfig = __webpack_require__(212);
+
+	var _appConfig2 = _interopRequireDefault(_appConfig);
+
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	document.addEventListener('DOMContentLoaded', function () {
+	  var mapMountPoint = document.createElement('div');
+	  var mapboxAccessToken = _appConfig2.default.mapboxAccessToken;
+	  var mapboxStyleUrl = _appConfig2.default.mapboxStyleUrl;
+
+
+	  document.body.appendChild(mapMountPoint);
+	  _mapboxGl2.default.accessToken = mapboxAccessToken;
+
+	  var map = new _mapboxGl2.default.Map({
+	    container: mapMountPoint,
+	    style: mapboxStyleUrl
+	  });
+	});
 
 /***/ },
 /* 1 */
@@ -38244,6 +38267,403 @@
 	    }
 	};
 
+
+/***/ },
+/* 206 */
+/***/ function(module, exports, __webpack_require__) {
+
+	// style-loader: Adds some css to the DOM by adding a <style> tag
+
+	// load the styles
+	var content = __webpack_require__(207);
+	if(typeof content === 'string') content = [[module.id, content, '']];
+	// add the styles to the DOM
+	var update = __webpack_require__(209)(content, {});
+	if(content.locals) module.exports = content.locals;
+	// Hot Module Replacement
+	if(false) {
+		// When the styles change, update the <style> tags
+		if(!content.locals) {
+			module.hot.accept("!!./../../../node_modules/css-loader/index.js!./mapbox-gl.css", function() {
+				var newContent = require("!!./../../../node_modules/css-loader/index.js!./mapbox-gl.css");
+				if(typeof newContent === 'string') newContent = [[module.id, newContent, '']];
+				update(newContent);
+			});
+		}
+		// When the module is disposed, remove the <style> tags
+		module.hot.dispose(function() { update(); });
+	}
+
+/***/ },
+/* 207 */
+/***/ function(module, exports, __webpack_require__) {
+
+	exports = module.exports = __webpack_require__(208)();
+	// imports
+
+
+	// module
+	exports.push([module.id, ".mapboxgl-map {\n    font: 12px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;\n    overflow: hidden;\n    position: relative;\n    -webkit-tap-highlight-color: rgba(0,0,0,0);\n}\n\n.mapboxgl-canvas-container.mapboxgl-interactive,\n.mapboxgl-ctrl-nav-compass {\n    cursor: -webkit-grab;\n    cursor: -moz-grab;\n    cursor: grab;\n}\n.mapboxgl-canvas-container.mapboxgl-interactive:active,\n.mapboxgl-ctrl-nav-compass:active {\n    cursor: -webkit-grabbing;\n    cursor: -moz-grabbing;\n    cursor: grabbing;\n}\n\n.mapboxgl-ctrl-top-left,\n.mapboxgl-ctrl-top-right,\n.mapboxgl-ctrl-bottom-left,\n.mapboxgl-ctrl-bottom-right  { position:absolute; pointer-events:none; z-index:2; }\n.mapboxgl-ctrl-top-left      { top:0; left:0; }\n.mapboxgl-ctrl-top-right     { top:0; right:0; }\n.mapboxgl-ctrl-bottom-left   { bottom:0; left:0; }\n.mapboxgl-ctrl-bottom-right  { right:0; bottom:0; }\n\n.mapboxgl-ctrl { clear:both; pointer-events:auto }\n.mapboxgl-ctrl-top-left .mapboxgl-ctrl { margin:10px 0 0 10px; float:left; }\n.mapboxgl-ctrl-top-right .mapboxgl-ctrl{ margin:10px 10px 0 0; float:right; }\n.mapboxgl-ctrl-bottom-left .mapboxgl-ctrl { margin:0 0 10px 10px; float:left; }\n.mapboxgl-ctrl-bottom-right .mapboxgl-ctrl { margin:0 10px 10px 0; float:right; }\n\n.mapboxgl-ctrl-group {\n    border-radius: 4px;\n    -moz-box-shadow: 0px 0px 2px rgba(0,0,0,0.1);\n    -webkit-box-shadow: 0px 0px 2px rgba(0,0,0,0.1);\n    box-shadow: 0px 0px 0px 2px rgba(0,0,0,0.1);\n    overflow: hidden;\n    background: #fff;\n}\n.mapboxgl-ctrl-group > button {\n    width: 30px;\n    height: 30px;\n    display: block;\n    padding: 0;\n    outline: none;\n    border: none;\n    border-bottom: 1px solid #ddd;\n    box-sizing: border-box;\n    background-color: rgba(0,0,0,0);\n    cursor: pointer;\n}\n/* https://bugzilla.mozilla.org/show_bug.cgi?id=140562 */\n.mapboxgl-ctrl > button::-moz-focus-inner {\n    border: 0;\n    padding: 0;\n}\n.mapboxgl-ctrl > button:last-child {\n    border-bottom: 0;\n}\n.mapboxgl-ctrl > button:hover {\n    background-color: rgba(0,0,0,0.05);\n}\n.mapboxgl-ctrl-icon,\n.mapboxgl-ctrl-icon > div.arrow {\n    speak: none;\n    -webkit-font-smoothing: antialiased;\n    -moz-osx-font-smoothing: grayscale;\n}\n.mapboxgl-ctrl-icon.mapboxgl-ctrl-zoom-out {\n    padding: 5px;\n    background-image: url(\"data:image/svg+xml;charset=utf8,%3Csvg%20viewBox%3D%270%200%2020%2020%27%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%3E%0A%20%20%3Cpath%20style%3D%27fill%3A%23333333%3B%27%20d%3D%27m%207%2C9%20c%20-0.554%2C0%20-1%2C0.446%20-1%2C1%200%2C0.554%200.446%2C1%201%2C1%20l%206%2C0%20c%200.554%2C0%201%2C-0.446%201%2C-1%200%2C-0.554%20-0.446%2C-1%20-1%2C-1%20z%27%20%2F%3E%0A%3C%2Fsvg%3E%0A\");\n}\n.mapboxgl-ctrl-icon.mapboxgl-ctrl-zoom-in  {\n    padding: 5px;\n    background-image: url(\"data:image/svg+xml;charset=utf8,%3Csvg%20viewBox%3D%270%200%2020%2020%27%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%3E%0A%20%20%3Cpath%20style%3D%27fill%3A%23333333%3B%27%20d%3D%27M%2010%206%20C%209.446%206%209%206.4459904%209%207%20L%209%209%20L%207%209%20C%206.446%209%206%209.446%206%2010%20C%206%2010.554%206.446%2011%207%2011%20L%209%2011%20L%209%2013%20C%209%2013.55401%209.446%2014%2010%2014%20C%2010.554%2014%2011%2013.55401%2011%2013%20L%2011%2011%20L%2013%2011%20C%2013.554%2011%2014%2010.554%2014%2010%20C%2014%209.446%2013.554%209%2013%209%20L%2011%209%20L%2011%207%20C%2011%206.4459904%2010.554%206%2010%206%20z%27%20%2F%3E%0A%3C%2Fsvg%3E%0A\");\n}\n.mapboxgl-ctrl-icon.mapboxgl-ctrl-geolocate  {\n    padding: 5px;\n    background-image: url(\"data:image/svg+xml;base64,PHN2ZyB4bWxuczpzdmc9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyMCAyMCIgdmVyc2lvbj0iMS4xIj48cGF0aCBkPSJNMTAgNEM5IDQgOSA1IDkgNUw5IDUuMUE1IDUgMCAwIDAgNS4xIDlMNSA5QzUgOSA0IDkgNCAxMCA0IDExIDUgMTEgNSAxMUw1LjEgMTFBNSA1IDAgMCAwIDkgMTQuOUw5IDE1QzkgMTUgOSAxNiAxMCAxNiAxMSAxNiAxMSAxNSAxMSAxNUwxMSAxNC45QTUgNSAwIDAgMCAxNC45IDExTDE1IDExQzE1IDExIDE2IDExIDE2IDEwIDE2IDkgMTUgOSAxNSA5TDE0LjkgOUE1IDUgMCAwIDAgMTEgNS4xTDExIDVDMTEgNSAxMSA0IDEwIDR6TTEwIDYuNUEzLjUgMy41IDAgMCAxIDEzLjUgMTAgMy41IDMuNSAwIDAgMSAxMCAxMy41IDMuNSAzLjUgMCAwIDEgNi41IDEwIDMuNSAzLjUgMCAwIDEgMTAgNi41ek0xMCA4LjNBMS44IDEuOCAwIDAgMCA4LjMgMTAgMS44IDEuOCAwIDAgMCAxMCAxMS44IDEuOCAxLjggMCAwIDAgMTEuOCAxMCAxLjggMS44IDAgMCAwIDEwIDguM3oiIGZpbGw9IiMzMzMiLz48L3N2Zz4=\");\n}\n\n.mapboxgl-ctrl-icon.mapboxgl-ctrl-compass > div.arrow {\n    width: 20px;\n    height: 20px;\n    margin: 5px;\n    background-image: url(\"data:image/svg+xml;charset=utf8,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%2020%2020%27%3E%0A%09%3Cpolygon%20fill%3D%27%23333333%27%20points%3D%276%2C9%2010%2C1%2014%2C9%27%2F%3E%0A%09%3Cpolygon%20fill%3D%27%23CCCCCC%27%20points%3D%276%2C11%2010%2C19%2014%2C11%20%27%2F%3E%0A%3C%2Fsvg%3E\");\n    background-repeat: no-repeat;\n}\n\n.mapboxgl-ctrl.mapboxgl-ctrl-attrib {\n    padding: 0 5px;\n    background-color: rgba(255,255,255,0.5);\n    margin: 0;\n}\n.mapboxgl-ctrl-attrib a {\n    color: rgba(0,0,0,0.75);\n    text-decoration: none;\n}\n.mapboxgl-ctrl-attrib a:hover {\n    color: inherit;\n    text-decoration: underline;\n}\n.mapboxgl-ctrl-attrib .mapbox-improve-map {\n    font-weight: bold;\n    margin-left: 2px;\n}\n\n.mapboxgl-popup {\n    position: absolute;\n    top: 0;\n    left: 0;\n    display: -webkit-flex;\n    display: flex;\n    will-change: transform;\n    pointer-events: none;\n}\n.mapboxgl-popup-anchor-top,\n.mapboxgl-popup-anchor-top-left,\n.mapboxgl-popup-anchor-top-right {\n    -webkit-flex-direction: column;\n    flex-direction: column;\n}\n.mapboxgl-popup-anchor-bottom,\n.mapboxgl-popup-anchor-bottom-left,\n.mapboxgl-popup-anchor-bottom-right {\n    -webkit-flex-direction: column-reverse;\n    flex-direction: column-reverse;\n}\n.mapboxgl-popup-anchor-left {\n    -webkit-flex-direction: row;\n    flex-direction: row;\n}\n.mapboxgl-popup-anchor-right {\n    -webkit-flex-direction: row-reverse;\n    flex-direction: row-reverse;\n}\n.mapboxgl-popup-tip {\n    width: 0;\n    height: 0;\n    border: 10px solid transparent;\n    z-index: 1;\n}\n.mapboxgl-popup-anchor-top .mapboxgl-popup-tip {\n    -webkit-align-self: center;\n    align-self: center;\n    border-top: none;\n    border-bottom-color: #fff;\n}\n.mapboxgl-popup-anchor-top-left .mapboxgl-popup-tip {\n    -webkit-align-self: flex-start;\n    align-self: flex-start;\n    border-top: none;\n    border-left: none;\n    border-bottom-color: #fff;\n}\n.mapboxgl-popup-anchor-top-right .mapboxgl-popup-tip {\n    -webkit-align-self: flex-end;\n    align-self: flex-end;\n    border-top: none;\n    border-right: none;\n    border-bottom-color: #fff;\n}\n.mapboxgl-popup-anchor-bottom .mapboxgl-popup-tip {\n    -webkit-align-self: center;\n    align-self: center;\n    border-bottom: none;\n    border-top-color: #fff;\n}\n.mapboxgl-popup-anchor-bottom-left .mapboxgl-popup-tip {\n    -webkit-align-self: flex-start;\n    align-self: flex-start;\n    border-bottom: none;\n    border-left: none;\n    border-top-color: #fff;\n}\n.mapboxgl-popup-anchor-bottom-right .mapboxgl-popup-tip {\n    -webkit-align-self: flex-end;\n    align-self: flex-end;\n    border-bottom: none;\n    border-right: none;\n    border-top-color: #fff;\n}\n.mapboxgl-popup-anchor-left .mapboxgl-popup-tip {\n    -webkit-align-self: center;\n    align-self: center;\n    border-left: none;\n    border-right-color: #fff;\n}\n.mapboxgl-popup-anchor-right .mapboxgl-popup-tip {\n    -webkit-align-self: center;\n    align-self: center;\n    border-right: none;\n    border-left-color: #fff;\n}\n.mapboxgl-popup-close-button {\n    position: absolute;\n    right: 0;\n    top: 0;\n    border: none;\n    border-radius: 0 3px 0 0;\n    cursor: pointer;\n    background-color: rgba(0,0,0,0);\n}\n.mapboxgl-popup-close-button:hover {\n    background-color: rgba(0,0,0,0.05);\n}\n.mapboxgl-popup-content {\n    position: relative;\n    background: #fff;\n    border-radius: 3px;\n    box-shadow: 0 1px 2px rgba(0,0,0,0.10);\n    padding: 10px 10px 15px;\n    pointer-events: auto;\n}\n.mapboxgl-popup-anchor-top-left .mapboxgl-popup-content {\n    border-top-left-radius: 0;\n}\n.mapboxgl-popup-anchor-top-right .mapboxgl-popup-content {\n    border-top-right-radius: 0;\n}\n.mapboxgl-popup-anchor-bottom-left .mapboxgl-popup-content {\n    border-bottom-left-radius: 0;\n}\n.mapboxgl-popup-anchor-bottom-right .mapboxgl-popup-content {\n    border-bottom-right-radius: 0;\n}\n\n.mapboxgl-marker {\n    position: absolute;\n    top: 0;\n    left: 0;\n    will-change: transform;\n}\n\n.mapboxgl-crosshair,\n.mapboxgl-crosshair .mapboxgl-interactive,\n.mapboxgl-crosshair .mapboxgl-interactive:active {\n    cursor: crosshair;\n}\n.mapboxgl-boxzoom {\n    position: absolute;\n    top: 0;\n    left: 0;\n    width: 0;\n    height: 0;\n    background: #fff;\n    border: 2px dotted #202020;\n    opacity: 0.5;\n}\n@media print {\n    .mapbox-improve-map {\n        display:none;\n    }\n}\n", ""]);
+
+	// exports
+
+
+/***/ },
+/* 208 */
+/***/ function(module, exports) {
+
+	/*
+		MIT License http://www.opensource.org/licenses/mit-license.php
+		Author Tobias Koppers @sokra
+	*/
+	// css base code, injected by the css-loader
+	module.exports = function() {
+		var list = [];
+
+		// return the list of modules as css string
+		list.toString = function toString() {
+			var result = [];
+			for(var i = 0; i < this.length; i++) {
+				var item = this[i];
+				if(item[2]) {
+					result.push("@media " + item[2] + "{" + item[1] + "}");
+				} else {
+					result.push(item[1]);
+				}
+			}
+			return result.join("");
+		};
+
+		// import a list of modules into the list
+		list.i = function(modules, mediaQuery) {
+			if(typeof modules === "string")
+				modules = [[null, modules, ""]];
+			var alreadyImportedModules = {};
+			for(var i = 0; i < this.length; i++) {
+				var id = this[i][0];
+				if(typeof id === "number")
+					alreadyImportedModules[id] = true;
+			}
+			for(i = 0; i < modules.length; i++) {
+				var item = modules[i];
+				// skip already imported module
+				// this implementation is not 100% perfect for weird media query combinations
+				//  when a module is imported multiple times with different media queries.
+				//  I hope this will never occur (Hey this way we have smaller bundles)
+				if(typeof item[0] !== "number" || !alreadyImportedModules[item[0]]) {
+					if(mediaQuery && !item[2]) {
+						item[2] = mediaQuery;
+					} else if(mediaQuery) {
+						item[2] = "(" + item[2] + ") and (" + mediaQuery + ")";
+					}
+					list.push(item);
+				}
+			}
+		};
+		return list;
+	};
+
+
+/***/ },
+/* 209 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/*
+		MIT License http://www.opensource.org/licenses/mit-license.php
+		Author Tobias Koppers @sokra
+	*/
+	var stylesInDom = {},
+		memoize = function(fn) {
+			var memo;
+			return function () {
+				if (typeof memo === "undefined") memo = fn.apply(this, arguments);
+				return memo;
+			};
+		},
+		isOldIE = memoize(function() {
+			return /msie [6-9]\b/.test(window.navigator.userAgent.toLowerCase());
+		}),
+		getHeadElement = memoize(function () {
+			return document.head || document.getElementsByTagName("head")[0];
+		}),
+		singletonElement = null,
+		singletonCounter = 0,
+		styleElementsInsertedAtTop = [];
+
+	module.exports = function(list, options) {
+		if(false) {
+			if(typeof document !== "object") throw new Error("The style-loader cannot be used in a non-browser environment");
+		}
+
+		options = options || {};
+		// Force single-tag solution on IE6-9, which has a hard limit on the # of <style>
+		// tags it will allow on a page
+		if (typeof options.singleton === "undefined") options.singleton = isOldIE();
+
+		// By default, add <style> tags to the bottom of <head>.
+		if (typeof options.insertAt === "undefined") options.insertAt = "bottom";
+
+		var styles = listToStyles(list);
+		addStylesToDom(styles, options);
+
+		return function update(newList) {
+			var mayRemove = [];
+			for(var i = 0; i < styles.length; i++) {
+				var item = styles[i];
+				var domStyle = stylesInDom[item.id];
+				domStyle.refs--;
+				mayRemove.push(domStyle);
+			}
+			if(newList) {
+				var newStyles = listToStyles(newList);
+				addStylesToDom(newStyles, options);
+			}
+			for(var i = 0; i < mayRemove.length; i++) {
+				var domStyle = mayRemove[i];
+				if(domStyle.refs === 0) {
+					for(var j = 0; j < domStyle.parts.length; j++)
+						domStyle.parts[j]();
+					delete stylesInDom[domStyle.id];
+				}
+			}
+		};
+	}
+
+	function addStylesToDom(styles, options) {
+		for(var i = 0; i < styles.length; i++) {
+			var item = styles[i];
+			var domStyle = stylesInDom[item.id];
+			if(domStyle) {
+				domStyle.refs++;
+				for(var j = 0; j < domStyle.parts.length; j++) {
+					domStyle.parts[j](item.parts[j]);
+				}
+				for(; j < item.parts.length; j++) {
+					domStyle.parts.push(addStyle(item.parts[j], options));
+				}
+			} else {
+				var parts = [];
+				for(var j = 0; j < item.parts.length; j++) {
+					parts.push(addStyle(item.parts[j], options));
+				}
+				stylesInDom[item.id] = {id: item.id, refs: 1, parts: parts};
+			}
+		}
+	}
+
+	function listToStyles(list) {
+		var styles = [];
+		var newStyles = {};
+		for(var i = 0; i < list.length; i++) {
+			var item = list[i];
+			var id = item[0];
+			var css = item[1];
+			var media = item[2];
+			var sourceMap = item[3];
+			var part = {css: css, media: media, sourceMap: sourceMap};
+			if(!newStyles[id])
+				styles.push(newStyles[id] = {id: id, parts: [part]});
+			else
+				newStyles[id].parts.push(part);
+		}
+		return styles;
+	}
+
+	function insertStyleElement(options, styleElement) {
+		var head = getHeadElement();
+		var lastStyleElementInsertedAtTop = styleElementsInsertedAtTop[styleElementsInsertedAtTop.length - 1];
+		if (options.insertAt === "top") {
+			if(!lastStyleElementInsertedAtTop) {
+				head.insertBefore(styleElement, head.firstChild);
+			} else if(lastStyleElementInsertedAtTop.nextSibling) {
+				head.insertBefore(styleElement, lastStyleElementInsertedAtTop.nextSibling);
+			} else {
+				head.appendChild(styleElement);
+			}
+			styleElementsInsertedAtTop.push(styleElement);
+		} else if (options.insertAt === "bottom") {
+			head.appendChild(styleElement);
+		} else {
+			throw new Error("Invalid value for parameter 'insertAt'. Must be 'top' or 'bottom'.");
+		}
+	}
+
+	function removeStyleElement(styleElement) {
+		styleElement.parentNode.removeChild(styleElement);
+		var idx = styleElementsInsertedAtTop.indexOf(styleElement);
+		if(idx >= 0) {
+			styleElementsInsertedAtTop.splice(idx, 1);
+		}
+	}
+
+	function createStyleElement(options) {
+		var styleElement = document.createElement("style");
+		styleElement.type = "text/css";
+		insertStyleElement(options, styleElement);
+		return styleElement;
+	}
+
+	function createLinkElement(options) {
+		var linkElement = document.createElement("link");
+		linkElement.rel = "stylesheet";
+		insertStyleElement(options, linkElement);
+		return linkElement;
+	}
+
+	function addStyle(obj, options) {
+		var styleElement, update, remove;
+
+		if (options.singleton) {
+			var styleIndex = singletonCounter++;
+			styleElement = singletonElement || (singletonElement = createStyleElement(options));
+			update = applyToSingletonTag.bind(null, styleElement, styleIndex, false);
+			remove = applyToSingletonTag.bind(null, styleElement, styleIndex, true);
+		} else if(obj.sourceMap &&
+			typeof URL === "function" &&
+			typeof URL.createObjectURL === "function" &&
+			typeof URL.revokeObjectURL === "function" &&
+			typeof Blob === "function" &&
+			typeof btoa === "function") {
+			styleElement = createLinkElement(options);
+			update = updateLink.bind(null, styleElement);
+			remove = function() {
+				removeStyleElement(styleElement);
+				if(styleElement.href)
+					URL.revokeObjectURL(styleElement.href);
+			};
+		} else {
+			styleElement = createStyleElement(options);
+			update = applyToTag.bind(null, styleElement);
+			remove = function() {
+				removeStyleElement(styleElement);
+			};
+		}
+
+		update(obj);
+
+		return function updateStyle(newObj) {
+			if(newObj) {
+				if(newObj.css === obj.css && newObj.media === obj.media && newObj.sourceMap === obj.sourceMap)
+					return;
+				update(obj = newObj);
+			} else {
+				remove();
+			}
+		};
+	}
+
+	var replaceText = (function () {
+		var textStore = [];
+
+		return function (index, replacement) {
+			textStore[index] = replacement;
+			return textStore.filter(Boolean).join('\n');
+		};
+	})();
+
+	function applyToSingletonTag(styleElement, index, remove, obj) {
+		var css = remove ? "" : obj.css;
+
+		if (styleElement.styleSheet) {
+			styleElement.styleSheet.cssText = replaceText(index, css);
+		} else {
+			var cssNode = document.createTextNode(css);
+			var childNodes = styleElement.childNodes;
+			if (childNodes[index]) styleElement.removeChild(childNodes[index]);
+			if (childNodes.length) {
+				styleElement.insertBefore(cssNode, childNodes[index]);
+			} else {
+				styleElement.appendChild(cssNode);
+			}
+		}
+	}
+
+	function applyToTag(styleElement, obj) {
+		var css = obj.css;
+		var media = obj.media;
+
+		if(media) {
+			styleElement.setAttribute("media", media)
+		}
+
+		if(styleElement.styleSheet) {
+			styleElement.styleSheet.cssText = css;
+		} else {
+			while(styleElement.firstChild) {
+				styleElement.removeChild(styleElement.firstChild);
+			}
+			styleElement.appendChild(document.createTextNode(css));
+		}
+	}
+
+	function updateLink(linkElement, obj) {
+		var css = obj.css;
+		var sourceMap = obj.sourceMap;
+
+		if(sourceMap) {
+			// http://stackoverflow.com/a/26603875
+			css += "\n/*# sourceMappingURL=data:application/json;base64," + btoa(unescape(encodeURIComponent(JSON.stringify(sourceMap)))) + " */";
+		}
+
+		var blob = new Blob([css], { type: "text/css" });
+
+		var oldSrc = linkElement.href;
+
+		linkElement.href = URL.createObjectURL(blob);
+
+		if(oldSrc)
+			URL.revokeObjectURL(oldSrc);
+	}
+
+
+/***/ },
+/* 210 */
+/***/ function(module, exports, __webpack_require__) {
+
+	// style-loader: Adds some css to the DOM by adding a <style> tag
+
+	// load the styles
+	var content = __webpack_require__(211);
+	if(typeof content === 'string') content = [[module.id, content, '']];
+	// add the styles to the DOM
+	var update = __webpack_require__(209)(content, {});
+	if(content.locals) module.exports = content.locals;
+	// Hot Module Replacement
+	if(false) {
+		// When the styles change, update the <style> tags
+		if(!content.locals) {
+			module.hot.accept("!!./../../node_modules/css-loader/index.js?modules!./main.css", function() {
+				var newContent = require("!!./../../node_modules/css-loader/index.js?modules!./main.css");
+				if(typeof newContent === 'string') newContent = [[module.id, newContent, '']];
+				update(newContent);
+			});
+		}
+		// When the module is disposed, remove the <style> tags
+		module.hot.dispose(function() { update(); });
+	}
+
+/***/ },
+/* 211 */
+/***/ function(module, exports, __webpack_require__) {
+
+	exports = module.exports = __webpack_require__(208)();
+	// imports
+
+
+	// module
+	exports.push([module.id, "", ""]);
+
+	// exports
+
+
+/***/ },
+/* 212 */
+/***/ function(module, exports) {
+
+	module.exports = {
+		"mapboxAccessToken": "pk.eyJ1IjoiaGVwdGFoZWRyb24iLCJhIjoiY2lzOWthenMxMDAyczJvbzJpaHAwM3p4ayJ9.SEety9YReHEUPqZlJtoFbg",
+		"mapboxStyleUrl": "mapbox://styles/mapbox/streets-v9"
+	};
 
 /***/ }
 /******/ ]);

@@ -5,7 +5,23 @@ const context = __dirname + '/src',
       path    = __dirname + '/dist',
       filename  = 'output.js'
 
-const mapboxShadersDir = __dirname + '/node_modules/mapbox-gl-shaders'
+const mapboxShadersDir = __dirname + '/node_modules/mapbox-gl-shaders',
+      stylesDir = context + '/styles',
+      vendorStylesDir = stylesDir + '/vendor',
+      inDir = dir => file => file.startsWith(dir + '/'),
+      not = f => function() { return !f(...arguments) },
+      and = (f1, f2) => function() { 
+        return f1(...arguments) && f2(...arguments)
+      }
+
+// useful for debugging loader config include field
+const logArgs = (tag, f) => function() {
+        const argStr = [...arguments].map(JSON.stringify).join(', ')
+        console.log(`${tag}(${argStr})`)
+        const ret = f(...arguments)
+        console.log(`${tag} returned ${ret}`)
+        return ret
+      }
 
 // https://github.com/mapbox/mapbox-gl-js/blob/master/webpack.config.example.js
 
@@ -27,20 +43,25 @@ module.exports = {
       // ES6 transpilation
       { test: /\.js$/,
         loader: 'babel',
-        include: p => p.startsWith(context) },
+        include: inDir(context) },
       // I'll let you guess what this is for
       { test: /\.css$/,
-        loader: 'style!css?modules' },
+        loader: 'style!css?modules',
+        include: and(inDir(stylesDir), not(inDir(vendorStylesDir))) },
       // For geospatial data and mapbox-gl
       { test: /\.json$/,
         loader: 'json' },
       // for mapbox-gl's use of browserifyfs or whatever
       { test: /\.js$/,
-        include: mapboxShadersDir + '/index.js',
-        loader: 'transform/cacheable?brfs' }
+        loader: 'transform/cacheable?brfs',
+        include: mapboxShadersDir + '/index.js' },
+      // don't need css modules for vendor styles (e.g. from mapbox)
+      { test: /\.css$/,
+        loader: 'style!css',
+        include: inDir(vendorStylesDir) }
     ],
     postLoaders: [
-      { include: p => p.startsWith(mapboxShadersDir + '/'),
+      { include: inDir(mapboxShadersDir),
         loader: 'transform', 
         query: 'brfs' }
     ]
