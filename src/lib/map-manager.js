@@ -34,5 +34,5 @@ MapManager.TOKEN_REQUIRED = "Must provide access token "
                             + "before initializing map manager!"
 MapManager.defaultOptions = {
   style: 'mapbox://styles/mapbox/streets-v9',
-  zoom: 6
+  zoom: 9
 }
