@@ -1,19 +1,26 @@
-import mapboxgl from 'mapbox-gl'
-import './styles/vendor/mapbox-gl.css'
-
-import './styles/main.css'
+import MapManager from './lib/map-manager'
 import appConfig from './app-config.json'
+import './styles/main.css'
 
-document.addEventListener('DOMContentLoaded', () => {
-  const mapMountPoint = document.createElement('div'),
-        { mapboxAccessToken,
+import censusData from './data/BernallioCensusBlocks_Joined.json'
+
+// for exploration purposes
+Object.assign(window, { censusData })
+
+function initApp() {
+  const { mapboxAccessToken,
           mapboxStyleUrl } = appConfig
 
-  document.body.appendChild(mapMountPoint)
-  mapboxgl.accessToken = mapboxAccessToken
+  MapManager.setAccessToken(mapboxAccessToken)
 
-  let map = new mapboxgl.Map({
-    container: mapMountPoint,
+  let map = new MapManager()
+  map.init({
+    mountPoint: document.body,
     style: mapboxStyleUrl
   })
-})
+
+  // see above
+  Object.assign(window, { map })
+}
+
+document.addEventListener('DOMContentLoaded', initApp)
