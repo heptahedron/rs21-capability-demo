@@ -90,10 +90,6 @@ class FbDataParser {
         this.placeTypeNums[typeStr] = 
           newNumMapping[this.placeTypeNums[typeStr]]
       )
-
-    console.log(this.placeTypes)
-    console.log(this.placeTypeNums)
-    process.exit()
   }
 
   toGeoJson() {
