@@ -71,5 +71,5 @@ module.exports = {
   })],
   // apparently can't use eval or eval-source-map, though I don't particularly
   // want to
-  devtool: 'cheap-source-map'
+  // devtool: 'cheap-source-map'
 }

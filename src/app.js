@@ -34,9 +34,17 @@ function initApp() {
           property: 'nCheckins',
           stops: [
             [0, 5],
-            [500, 20]
+            [500, 10]
           ]
-        }
+        },
+        'circle-color': {
+          property: 'typeNum',
+          stops: [
+            [0, '#00f'],
+            [80, '#f00']
+          ]
+        },
+        'circle-opacity': .4
       }
     })
   })
