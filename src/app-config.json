@@ -1,4 +1,8 @@
 {
   "mapboxAccessToken": "pk.eyJ1IjoiaGVwdGFoZWRyb24iLCJhIjoiY2lzOWthenMxMDAyczJvbzJpaHAwM3p4ayJ9.SEety9YReHEUPqZlJtoFbg",
-  "mapboxStyleUrl" : "mapbox://styles/mapbox/streets-v9"
+  "mapboxStyleUrl" : "mapbox://styles/mapbox/streets-v9",
+  "initialView": {
+    "center": [-106.6056, 35.0853],
+    "zoom": 10
+  }
 }

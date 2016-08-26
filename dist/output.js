@@ -14786,6 +14786,7 @@
 
 	var bundleFn = arguments[3];
 	var sources = arguments[4];
+  console.log(sources)
 	var cache = arguments[5];
 
 	var stringify = JSON.stringify;

@@ -5,9 +5,11 @@ import styles from '../styles/map-manager.css'
 
 export default class MapManager {
   constructor() {
+    this.initialized = false
     this.container = document.createElement('div')
     this.container.className = styles.mapContainer
     this._map = null
+    this._mapPromise = null
   }
 
   init(options) {
@@ -22,6 +24,20 @@ export default class MapManager {
         container: this.container
       })
     this._map = new mapboxgl.Map(mapConfig)
+    this._mapPromise = new Promise((resolve, reject) => {
+      // no error handling! living life on the edge. wowie
+      this._map.on('load', () => resolve(this._map))
+    })
+
+    this.initialized = true
+  }
+
+  getMap() {
+    if (!this.initialized) {
+      throw this.constructor.INIT_REQUIRED
+    }
+
+    return this._mapPromise
   }
 
   static setAccessToken(accessToken) {
@@ -30,6 +46,7 @@ export default class MapManager {
 }
 
 MapManager.accessToken = null
+MapManager.INIT_REQUIRED = "MapManager must be initialized prior to getMap()!"
 MapManager.TOKEN_REQUIRED = "Must provide access token "
                             + "before initializing map manager!"
 MapManager.defaultOptions = {

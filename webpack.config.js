@@ -5,8 +5,7 @@ const context = __dirname + '/src',
       path    = __dirname + '/dist',
       filename  = 'output.js'
 
-const customLoadersDir = __dirname + '/custom-loaders',
-      mapboxShadersDir = __dirname + '/node_modules/mapbox-gl-shaders',
+const mapboxShadersDir = __dirname + '/node_modules/mapbox-gl-shaders',
       stylesDir = context + '/styles',
       vendorStylesDir = stylesDir + '/vendor',
       inDir = dir => file => file.startsWith(dir + '/'),
@@ -14,15 +13,6 @@ const customLoadersDir = __dirname + '/custom-loaders',
       and = (f1, f2) => function() { 
         return f1(...arguments) && f2(...arguments)
       }
-/*
-      customLoaderAliases = [
-        'fbdata'
-      ]
-        .map(alias => 
-          ({ [alias + '$']: `${customLoadersDir}/${alias}.js` }))
-        .reduce(Object.assign, {}),
-console.log(customLoaderAliases)
-*/
 
 // useful for debugging loader config include field
 const logArgs = (tag, f) => function() {
@@ -41,6 +31,12 @@ module.exports = {
   output: {
     path,
     filename
+  },
+  resolve: {
+    alias: {
+      // for mapbox-gl
+      'webworkify': 'webworkify-webpack'
+    }
   },
   module: {
     loaders: [

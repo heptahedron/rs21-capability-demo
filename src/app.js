@@ -5,24 +5,41 @@ import './styles/main.css'
 import fbData from 'fbdata!../data/FacebookPlaces_Albuquerque.csv'
 // import censusData from './data/BernallioCensusBlocks_Joined.json'
 
-// for exploration purposes
-console.log(fbData)
-Object.assign(window, { fbData })
-
 function initApp() {
   const { mapboxAccessToken,
-          mapboxStyleUrl } = appConfig
+          mapboxStyleUrl,
+          initialView: { center, zoom } } = appConfig
 
   MapManager.setAccessToken(mapboxAccessToken)
 
   let map = new MapManager()
   map.init({
     mountPoint: document.body,
-    style: mapboxStyleUrl
+    style: mapboxStyleUrl,
+    center, zoom
   })
 
-  // see above
-  Object.assign(window, { map })
+  map.getMap().then(map => {
+    map.addSource('fbplaces', {
+      type: 'geojson',
+      data: fbData
+    })
+
+    map.addLayer({
+      id: 'checkinMagnitude',
+      source: 'fbplaces',
+      type: 'circle',
+      paint: {
+        'circle-radius': {
+          property: 'nCheckins',
+          stops: [
+            [0, 5],
+            [500, 20]
+          ]
+        }
+      }
+    })
+  })
 }
 
 document.addEventListener('DOMContentLoaded', initApp)
