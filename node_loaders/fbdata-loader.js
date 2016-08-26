@@ -114,8 +114,5 @@ module.exports = function(fbPlaceCsv) {
   fbdp.parse(fbPlaceCsv)
   fbdp.optimizeTypeNums()
   const geoJson = fbdp.toGeoJson()
-  console.log(geoJson.features[10].properties)
-  console.log(geoJson.properties.placeTypes.School)
-  process.exit()
   return `module.exports = ${JSON.stringify(geoJson)}`
 }
