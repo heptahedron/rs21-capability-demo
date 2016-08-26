@@ -88,8 +88,7 @@ class FbDataParser {
     Object.keys(this.placeTypeNums)
       .forEach(typeStr =>
         this.placeTypeNums[typeStr] = 
-          newNumMapping[this.placeTypeNums[typeStr]]
-      )
+          newNumMapping[this.placeTypeNums[typeStr]])
   }
 
   toGeoJson() {
