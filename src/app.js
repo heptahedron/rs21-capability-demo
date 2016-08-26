@@ -2,8 +2,11 @@ import MapManager from './lib/map-manager'
 import appConfig from './app-config.json'
 import './styles/main.css'
 
-import fbData from 'fbdata!../data/FacebookPlaces_Albuquerque.csv'
+import tweetData from 'tweets!../data/Twitter_141103.csv'
+// import fbData from 'fbdata!../data/FacebookPlaces_Albuquerque.csv'
 // import censusData from './data/BernallioCensusBlocks_Joined.json'
+
+console.log(tweetData)
 
 function initApp() {
   const { mapboxAccessToken,
@@ -20,6 +23,7 @@ function initApp() {
   })
 
   map.getMap().then(map => {
+    /*
     map.addSource('fbplaces', {
       type: 'geojson',
       data: fbData
@@ -45,6 +49,25 @@ function initApp() {
           ]
         },
         'circle-opacity': .4
+      }
+    })
+   */
+
+    map.addSource('tweets', {
+      type: 'geojson',
+      data: tweetData
+    })
+
+    map.addLayer({
+      id: 'tweets',
+      source: 'tweets',
+      type: 'circle',
+      paint: {
+        'circle-radius': 5,
+        'circle-color': {
+          property: 'hour',
+          stops: [[0, '#000'], [12, '#ff0'], [23.99, '#000']]
+        }
       }
     })
   })

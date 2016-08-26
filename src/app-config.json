@@ -3,6 +3,6 @@
   "mapboxStyleUrl" : "mapbox://styles/mapbox/streets-v9",
   "initialView": {
     "center": [-106.6056, 35.0853],
-    "zoom": 10
+    "zoom": 12
   }
 }

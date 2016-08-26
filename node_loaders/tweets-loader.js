@@ -18,35 +18,60 @@ class TweetParser {
 
   parseTweets(tweets) {
     let n = 100
-    tweets.split('\n').map(t => t.trim()).forEach(tweet => {
-      const tweetData = this.parseTweet(tweet)
-      console.log(tweetData)
-      if (!(--n)) process.exit()
-    })
+    this.tweets = tweets.split('\n')
+      .map(t => t.trim())
+      .map(t => this.parseTweet(t))
+      .filter(t => t !== null)
   }
 
   parseTweet(tweet) {
+    if (tweet.indexOf(';') === -1) { return null }
     const splitPoints = [
-      ...nthLastIndicesOf(',', tweet, 4),
-      tweet.lastIndexOf(';')
-    ]
+            ...nthLastIndicesOf(',', tweet, 4),
+            tweet.lastIndexOf(';')
+          ],
+          text = tweet.substring(0, splitPoints[0]),
+          user = tweet.substring(splitPoints[0]+1, splitPoints[1]),
+          lat = parseFloat(tweet.substring(splitPoints[1]+1, splitPoints[2])),
+          lon = parseFloat(tweet.substring(splitPoints[2]+1, splitPoints[3])),
+          timeStr = tweet.substring(splitPoints[3]+1, splitPoints[4]),
+          timeData = this.parseDateStr(timeStr)
 
-    return {
-      text: tweet.substring(0, splitPoints[0]),
-      user: tweet.substring(splitPoints[0], splitPoints[1]),
-      lat: tweet.substring(splitPoints[1], splitPoints[2]),
-      lon: tweet.substring(splitPOints[2], splitPoints[3])
-    }
+    return Object.assign({ text, user, lat, lon }, timeData)
+  }
+
+  parseDateStr(dateStr) {
+    const dateRegex = /(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2})/,
+          match = dateStr.match(dateRegex)
+
+    const [ , ...dateParts ] = match,
+          [ year, month, day,
+            hour, minute, second ] = dateParts.map(parseInt)
+
+    return { year, month, day, hour, minute, second }
   }
 
   toGeoJson() {
-  
+    let tweetJson = turf.featureCollection(this.tweets.map(tweet => {
+      const { text, user,
+              year, month, day,
+              hour, minute, second } = tweet
+
+      return turf.point([tweet.lon, tweet.lat], {
+        text, user,
+        year, month, day,
+        hour, minute
+      })
+    }))
+
+    return tweetJson
   }
 }
 
 module.exports = function(tweets) {
+  this.cacheable()
   let tp = new TweetParser()
   tp.parseTweets(tweets)
 
-  return `module.exports=${tp.toGeoJson()}`
+  return `module.exports=${JSON.stringify(tp.toGeoJson())}`
 }
