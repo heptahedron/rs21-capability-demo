@@ -1,34 +1,36 @@
+import mapboxgl from 'mapbox-gl'
 import turf from 'turf'
 
-import MapManager from './lib/map-manager'
 import appConfig from './app-config.json'
-import './styles/main.css'
+import styles from './styles/main.css'
 
 import tweetData from 'tweets!../data/Twitter_141103.csv'
 import fbData from 'fbdata!../data/FacebookPlaces_Albuquerque.csv'
 import censusData from '!!censusdata!../data/BernallioCensusBlocks_Joined.json'
 
-console.log(fbData)
-console.log(censusData)
-
 function initApp() {
   const { mapboxAccessToken,
-          mapboxStyleUrl,
-          initialView: { center, zoom } } = appConfig
+          mapConfig } = appConfig
+
+  mapboxgl.accessToken = mapboxAccessToken
 
   let searchArea = turf.featureCollection(
-    [turf.buffer(turf.point(center), 1)])
+    [turf.buffer(turf.point(mapConfig.center), 1)])
 
-  MapManager.setAccessToken(mapboxAccessToken)
+  const mapMountPoint = document.body,
+        mapContainer = document.createElement('div')
 
-  let mapManager = new MapManager()
-  mapManager.init({
-    mountPoint: document.body,
-    style: mapboxStyleUrl,
-    center, zoom
-  })
+  mapContainer.className = styles.mapContainer
+  mapMountPoint.appendChild(mapContainer)
 
-  mapManager.getMap().then(map => {
+  const mainMap = new mapboxgl.Map(
+          Object.assign({}, mapConfig, { container: mapContainer })),
+        awaitMapReady = new Promise((resolve, reject) => {
+          // TODO more robust error handling?
+          mainMap.on('load', () => resolve(mainMap))
+        })
+
+  awaitMapReady.then(map => {
     map.addSource('censusData', {
       type: 'geojson',
       data: censusData
@@ -102,12 +104,14 @@ function initApp() {
     map.on('click', function(e) {
       let newSearchArea = turf.featureCollection(
             [turf.buffer(turf.point(e.lngLat.toArray()), 1)]),
-          results = turf.collect(newSearchArea, fbData,
+          results       = turf.collect(newSearchArea, fbData,
                                  'typeNum', 'placeTypes'),
           placeTypeDist = results.features[0].properties.placeTypes
-            .reduce((typeNum, acc) => {
-              const { typeStr } = fbData.properties.placeTypes[typeNum]
-              if (typeof acc[fbData] === 'undefined') {
+            .map(typeNum => {
+              return fbData.properties.placeTypes[typeNum].typeStr
+            })
+            .reduce((acc, typeStr) => {
+              if (typeof acc[typeStr] === 'undefined') {
                 return Object.assign(acc, {
                   [typeStr]: 1
                 })
