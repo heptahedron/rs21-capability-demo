@@ -10,18 +10,14 @@ import censusData from '!!censusdata!../data/BernallioCensusBlocks_Joined.json'
 
 function initApp() {
   const { mapboxAccessToken,
-          mapConfig } = appConfig
-
-  mapboxgl.accessToken = mapboxAccessToken
-
-  let searchArea = turf.featureCollection(
-    [turf.buffer(turf.point(mapConfig.center), 1)])
-
-  const mapMountPoint = document.body,
+          mapConfig } = appConfig,
+        mapMountPoint = document.body,
         mapContainer = document.createElement('div')
 
   mapContainer.className = styles.mapContainer
   mapMountPoint.appendChild(mapContainer)
+
+  mapboxgl.accessToken = mapboxAccessToken
 
   const mainMap = new mapboxgl.Map(
           Object.assign({}, mapConfig, { container: mapContainer })),
@@ -29,6 +25,10 @@ function initApp() {
           // TODO more robust error handling?
           mainMap.on('load', () => resolve(mainMap))
         })
+
+  let searchArea = turf.featureCollection(
+    [turf.buffer(turf.point(mapConfig.center), 1)])
+
 
   awaitMapReady.then(map => {
     map.addSource('censusData', {
