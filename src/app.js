@@ -1,9 +1,11 @@
+import turf from 'turf'
+
 import MapManager from './lib/map-manager'
 import appConfig from './app-config.json'
 import './styles/main.css'
 
-// import tweetData from 'tweets!../data/Twitter_141103.csv'
-// import fbData from 'fbdata!../data/FacebookPlaces_Albuquerque.csv'
+import tweetData from 'tweets!../data/Twitter_141103.csv'
+import fbData from 'fbdata!../data/FacebookPlaces_Albuquerque.csv'
 import censusData from '!!censusdata!../data/BernallioCensusBlocks_Joined.json'
 
 console.log(censusData)
@@ -23,10 +25,32 @@ function initApp() {
   })
 
   mapManager.getMap().then(map => {
-    /*
+    map.addSource('censusData', {
+      type: 'geojson',
+      data: censusData
+    })
+
     map.addSource('fbplaces', {
       type: 'geojson',
       data: fbData
+    })
+
+    map.addSource('tweets', {
+      type: 'geojson',
+      data: tweetData
+    })
+
+    map.addLayer({
+      id: 'age',
+      source: 'censusData',
+      type: 'fill',
+      paint: {
+        'fill-opacity': 0.5,
+        'fill-color': {
+          property: 'medianAge',
+          stops: [[0, '#fff'], [100, '#000']]
+        }
+      }
     })
 
     map.addLayer({
@@ -41,20 +65,8 @@ function initApp() {
             [500, 10]
           ]
         },
-        'circle-color': {
-          property: 'typeNum',
-          stops: [
-            [0, '#00f'],
-            [80, '#f00']
-          ]
-        },
         'circle-opacity': .4
       }
-    })
-
-    map.addSource('tweets', {
-      type: 'geojson',
-      data: tweetData
     })
 
     map.addLayer({
@@ -69,7 +81,8 @@ function initApp() {
         }
       }
     })
-   */
+
+    // map.on('click', )
   })
 }
 
