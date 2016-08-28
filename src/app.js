@@ -2,11 +2,11 @@ import MapManager from './lib/map-manager'
 import appConfig from './app-config.json'
 import './styles/main.css'
 
-import tweetData from 'tweets!../data/Twitter_141103.csv'
+// import tweetData from 'tweets!../data/Twitter_141103.csv'
 // import fbData from 'fbdata!../data/FacebookPlaces_Albuquerque.csv'
-// import censusData from './data/BernallioCensusBlocks_Joined.json'
+import censusData from '!!censusdata!../data/BernallioCensusBlocks_Joined.json'
 
-console.log(tweetData)
+console.log(censusData)
 
 function initApp() {
   const { mapboxAccessToken,
@@ -51,7 +51,6 @@ function initApp() {
         'circle-opacity': .4
       }
     })
-   */
 
     map.addSource('tweets', {
       type: 'geojson',
@@ -70,6 +69,7 @@ function initApp() {
         }
       }
     })
+   */
   })
 }
 
