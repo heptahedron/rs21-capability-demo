@@ -7,11 +7,15 @@ const context = __dirname + '/src',
 
 const mapboxShadersDir = __dirname + '/node_modules/mapbox-gl-shaders',
       stylesDir = context + '/styles',
+      componentsDir = context + '/components',
       vendorStylesDir = stylesDir + '/vendor',
       inDir = dir => file => file.startsWith(dir + '/'),
       not = f => function() { return !f(...arguments) },
       and = (f1, f2) => function() { 
         return f1(...arguments) && f2(...arguments)
+      },
+      or = (f1, f2) => function() {
+        return f1(...arguments) || f2(...arguments)
       }
 
 // useful for debugging loader config include field
@@ -47,7 +51,9 @@ module.exports = {
       // I'll let you guess what this is for
       { test: /\.css$/,
         loader: 'style!css?modules',
-        include: and(inDir(stylesDir), not(inDir(vendorStylesDir))) },
+        include: or(
+          and(inDir(stylesDir), not(inDir(vendorStylesDir))),
+          inDir(componentsDir)) },
       // For geospatial data and mapbox-gl
       { test: /\.json$/,
         loader: 'json' },

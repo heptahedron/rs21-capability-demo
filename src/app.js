@@ -1,8 +1,9 @@
 import mapboxgl from 'mapbox-gl'
-import turf from 'turf'
 
 import appConfig from './app-config.json'
 import styles from './styles/main.css'
+
+import PlaceCompositionVis from './components/place-composition-vis/component'
 
 import tweetData from 'tweets!../data/Twitter_141103.csv'
 import fbData from 'fbdata!../data/FacebookPlaces_Albuquerque.csv'
@@ -11,11 +12,15 @@ import censusData from '!!censusdata!../data/BernallioCensusBlocks_Joined.json'
 function initApp() {
   const { mapboxAccessToken,
           mapConfig } = appConfig,
-        mapMountPoint = document.body,
-        mapContainer = document.createElement('div')
+        appRootElement = document.body,
+        mapContainer = document.createElement('div'),
+        areaInfoBox = document.createElement('div')
 
   mapContainer.className = styles.mapContainer
-  mapMountPoint.appendChild(mapContainer)
+  areaInfoBox.className = styles.areaInfoBox
+  areaInfoBox.textContent = 'Hello!'
+  appRootElement.appendChild(mapContainer)
+  appRootElement.appendChild(areaInfoBox)
 
   mapboxgl.accessToken = mapboxAccessToken
 
@@ -26,9 +31,18 @@ function initApp() {
           mainMap.on('load', () => resolve(mainMap))
         })
 
+  const awaitFbDataReady = Promise.resolve(fbData)
+
   awaitMapReady
     .then(map => { addDataLayers(map); return map })
-    .then(map => { addClickInteractivity(map); return map })
+
+  Promise.all([awaitMapReady, awaitFbDataReady])
+    .then(([map, fbData]) => {
+      console.log('map and fbData ready')
+      const placeCompVis = new PlaceCompositionVis(map, fbData)
+      placeCompVis.mount(areaInfoBox)
+      placeCompVis.addClickInteractivity()
+    })
 }
 
 function addDataLayers(map) {
@@ -90,48 +104,6 @@ function addDataLayers(map) {
     }
   })
   */
-}
-
-function addClickInteractivity(map) {
-  let searchArea = turf.featureCollection(
-    [turf.buffer(turf.point([0,0]), 1)])
-
-  map.addSource('searchArea', { type: 'geojson', data: searchArea })
-  map.addLayer({
-    id: 'searchArea',
-    source: 'searchArea',
-    type: 'fill',
-    layout: {
-      'visibility': 'none'
-    },
-    paint: {
-      'fill-color': 'rgba(0,0,255,.3)'
-    }
-  })
-
-  map.on('click', function(e) {
-    let newSearchArea = turf.featureCollection(
-      [turf.buffer(turf.point(e.lngLat.toArray()), 1)]),
-      results       = turf.collect(newSearchArea, fbData,
-                                   'typeNum', 'placeTypes'),
-      placeTypeDist = results.features[0].properties.placeTypes
-        .map(typeNum => {
-          return fbData.properties.placeTypes[typeNum].typeStr
-        })
-        .reduce((acc, typeStr) => {
-          if (typeof acc[typeStr] === 'undefined') {
-            return Object.assign(acc, {
-              [typeStr]: 1
-            })
-          }
-
-          ++acc[typeStr]
-          return acc
-        }, {})
-
-        map.getSource('searchArea').setData(newSearchArea)
-        map.setLayoutProperty('searchArea', 'visibility', 'visible')
-  })
 }
 
 document.addEventListener('DOMContentLoaded', initApp)
