@@ -11,23 +11,20 @@ class CensusDataParser {
     const oldCensusBlockData = JSON.parse(censusDataStr)
 
     oldCensusBlockData.features.forEach(feature => {
-      console.log(feature)
       const newCensusBlockDatum = bdts
         .map(bdt => ({
           [bdt.dataDesc]: bdt.simplifyProperties(feature.properties)
         }))
         .reduce((data, acc) => Object.assign(acc, data), {})
 
-      console.log(newCensusBlockDatum); process.exit()
-      this.censusBlockData.push(newCensusBlockDatum)
+      this.censusBlockData.push(turf.polygon(
+        feature.geometry.coordinates,
+        newCensusBlockDatum))
     })
-
-    console.dir(this.censusBlockData, { depth: null })
-    process.exit()
   }
 
   toGeoJson() {
-    return this.censusBlockData
+    return turf.featureCollection(this.censusBlockData)
     // return turf.featureCollection(this.censusBlockData)
   }
 }

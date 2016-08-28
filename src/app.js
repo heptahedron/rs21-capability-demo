@@ -15,14 +15,14 @@ function initApp() {
 
   MapManager.setAccessToken(mapboxAccessToken)
 
-  let map = new MapManager()
-  map.init({
+  let mapManager = new MapManager()
+  mapManager.init({
     mountPoint: document.body,
     style: mapboxStyleUrl,
     center, zoom
   })
 
-  map.getMap().then(map => {
+  mapManager.getMap().then(map => {
     /*
     map.addSource('fbplaces', {
       type: 'geojson',
