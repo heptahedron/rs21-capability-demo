@@ -41,7 +41,6 @@ class FbDataParser {
           lat       = parseFloat(fields[fields.length - 2]),
           lon       = parseFloat(fields[fields.length - 1])
 
-    // console.log({ name, typeStr, nCheckins, lat, lon })
     return { name, typeStr, nCheckins, lat, lon }
   }
 
@@ -57,7 +56,6 @@ class FbDataParser {
     }
 
     const placeTypeData = this.placeTypes[this.placeTypeNums[typeStr]]
-    assert(typeof placeTypeData === 'object')
     ++placeTypeData.nPlaces
     placeTypeData.nCheckins += nCheckins
     this.totalCheckins += nCheckins
