@@ -1,6 +1,8 @@
 .container {
   text-align: center;
-  margin: 0px 10px;
+  font-family: sans;
+  font-size: 14px;
+  margin: 0 10px;
 }
 
 .header {

@@ -5,6 +5,11 @@ export default function dom(nodeName, attrs=null, ...cs) {
   let newNode = document.createElement(nodeName)
   if (attrs) {
     for (const attr in attrs) {
+      if (attr === 'className') {
+        newNode.className = attrs[attr]
+        continue
+      }
+
       newNode.setAttribute(attr, attrs[attr])
     }
   }
@@ -68,7 +73,14 @@ Object.assign(dom, {
 export function svg(nodeName, attrs=null, ...cs) {
   let newNode = document.createElementNS(svg.xmlns, nodeName)
   if (attrs) {
-    svg.attr(newNode, attrs)
+    for (let attr in attrs) {
+      if (attr === 'className') {
+        newNode.className = attrs[attr]
+        continue
+      }
+
+      svg.attr(newNode, attr, attrs[attr])
+    }
   }
   cs.forEach(svg.append(newNode))
 
