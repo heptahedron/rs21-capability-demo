@@ -53,7 +53,7 @@ export default class PlaceCompositionVis extends LightComponent {
     this.innerChartText = svg('text', {
       'text-anchor': 'middle',
       'color': 'black',
-      'font-family': 'sans',
+      'font-family': 'sans-serif',
       'font-weight': 'bold',
       'font-size': '16px',
       x: this.radius, y: this.radius
@@ -61,7 +61,7 @@ export default class PlaceCompositionVis extends LightComponent {
     this.innerChartSubtext = svg('text', {
       'text-anchor': 'middle',
       'color': 'black',
-      'font-family': 'sans',
+      'font-family': 'sans-serif',
       'font-size': '12px',
       x: this.radius, y: this.radius + 16
     })
