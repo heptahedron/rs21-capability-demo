@@ -1,12 +1,15 @@
 const isString = x => (typeof x === 'string' || x instanceof String),
       toArr = xs => [].slice.call(xs)
 
-export default function dom(nodeName, attrs) {
+export default function dom(nodeName, attrs=null, ...cs) {
   let newNode = document.createElement(nodeName)
   if (attrs) {
     for (const attr in attrs) {
       newNode.setAttribute(attr, attrs[attr])
     }
+  }
+  if (cs.length > 0) {
+    cs.forEach(append(newNode))
   }
 
   return newNode
@@ -14,7 +17,7 @@ export default function dom(nodeName, attrs) {
 
 export function append(node, child) {
   if (Array.isArray(child)) {
-    child.forEach(c => append(node, c))
+    child.forEach(append(node))
     return node
   } else if (child) {
     node.appendChild(child)
@@ -51,6 +54,8 @@ export function text(node, txt) {
   if (isString(txt)) {
     node.textContent = txt
     return node
+  } else if (isString(node)) {
+    return document.createTextNode(node)
   }
 
   return node.textContent
@@ -60,11 +65,12 @@ Object.assign(dom, {
   append, clear, children, text
 })
 
-export function svg(nodeName, attrs) {
+export function svg(nodeName, attrs=null, ...cs) {
   let newNode = document.createElementNS(svg.xmlns, nodeName)
   if (attrs) {
     svg.attr(newNode, attrs)
   }
+  cs.forEach(svg.append(newNode))
 
   return newNode
 }
@@ -83,4 +89,4 @@ svg.attr = function svgAttr(node, attr, val) {
   return node
 }
 
-Object.assign(svg, { clear, children, append })
+Object.assign(svg, { clear, children, append, text })

@@ -11,21 +11,22 @@ export default class PlaceCompositionVis extends LightComponent {
     this.fbData = fbData
     this.filterTop = 1 // accounts for proliferation of Local Businesses
     this.radius = 150 / 2
+
+    this.svgEl = null
+    this.header = null
+    this.innerChartText = null
+    this.createRoot()
   }
 
-  get rootEl() {
-    return this.svgEl || (this.svgEl = this.createSvg())
-  }
+  createRoot() {
+    this.svgEl = svg('svg', {
+                   width: this.radius * 2,
+                   height: this.radius * 2
+                 })
 
-  set rootEl(el) { this.svgEl = el }
-
-  createSvg() {
-    const svgEl = svg('svg', {
-                    width: this.radius * 2,
-                    height: this.radius * 2
-                  })
-
-    return svgEl
+    this.header = dom('h3', {}, dom.text('Nearby establishments'))
+    this.header.className = styles.header
+    this.rootEl = dom('div', {}, this.header, this.svgEl)
   }
 
   initSearchLayer() {
@@ -144,10 +145,22 @@ export default class PlaceCompositionVis extends LightComponent {
     const thickness = 20,
           innerRadius = radius - thickness * 2
 
-    svg.append(this.svgEl, svg('circle', {
-      cx: innerRadius, cy: innerRadius,
-      fill: 'white'
-    }))
+    const whiteFill = svg('circle', {
+            cx: radius, cy: radius, r: innerRadius,
+            fill: '#fff'
+          })
+
+    svg.append(this.svgEl, whiteFill)
+
+    const hoverStyles = 'path:hover{opacity:0.5}'
+    svg.append(this.svgEl, svg('style', {}, dom.text(hoverStyles)))
+    this.innerChartText = svg('text', {
+      'text-anchor': 'middle',
+      color: 'black',
+      'font-family': 'sans',
+      x: this.radius, y: this.radius
+    }, svg.text(typeNums.length.toString()))
+    svg.append(this.svgEl, this.innerChartText)
   }
 
   addClickInteractivity() {
