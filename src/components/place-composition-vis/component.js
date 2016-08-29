@@ -24,6 +24,28 @@ export default class PlaceCompositionVis extends LightComponent {
           initialSearchCoords,
           initialSearchRadius))
     }
+    
+    // add map sources
+    map.addSource('fbplaces', {
+      type: 'geojson',
+      data: fbData
+    })
+
+    map.addLayer({
+      id: 'checkinMagnitude',
+      source: 'fbplaces',
+      type: 'circle',
+      paint: {
+        'circle-radius': {
+          property: 'nCheckins',
+          stops: [
+            [0, 5],
+            [500, 10]
+          ]
+        },
+        'circle-opacity': .4
+      }
+    })
   }
 
   createRoot() {
@@ -57,6 +79,7 @@ export default class PlaceCompositionVis extends LightComponent {
     this.header = dom('h3', {}, dom.text('Nearby places'))
     this.header.className = styles.header
     this.rootEl = dom('div', {}, this.header, this.svgEl)
+    this.rootEl.className = styles.container
   }
 
   initSearchLayer() {
@@ -136,6 +159,7 @@ export default class PlaceCompositionVis extends LightComponent {
     svg.clear(this.chartEl)
 
     if (typeNums.length === 0) {
+      this.setInnerText('None')
       return
     } else if (typeNums.length === 1) {
       svg.append(this.chartEl, svg('circle', {
@@ -199,7 +223,7 @@ export default class PlaceCompositionVis extends LightComponent {
     this.setInnerText(total.toString(), 'total')
   }
 
-  setInnerText(text, subtext='') {
+  setInnerText(text='', subtext='') {
     svg.text(this.innerChartText, text)
     svg.text(this.innerChartSubtext, subtext)
   }
