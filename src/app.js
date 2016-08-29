@@ -38,7 +38,8 @@ function initApp() {
   Promise.all([awaitMapReady, awaitFbDataReady])
     .then(([map, fbData]) => {
       console.log('map and fbData ready')
-      const placeCompVis = new PlaceCompositionVis(map, fbData)
+      const placeCompVis = new PlaceCompositionVis(map, fbData,
+                                                   mapConfig.center)
       placeCompVis.mount(areaInfoBox)
       placeCompVis.addClickInteractivity()
     })

@@ -5,7 +5,7 @@ import dom, { svg } from '../../lib/dom-util'
 import styles from './styles.css'
 
 export default class PlaceCompositionVis extends LightComponent {
-  constructor(map, fbData) {
+  constructor(map, fbData, initialSearchCoords=null, initialSearchRadius=50) {
     super()
     this.map = map
     this.fbData = fbData
@@ -13,18 +13,48 @@ export default class PlaceCompositionVis extends LightComponent {
     this.radius = 150 / 2
 
     this.svgEl = null
+    this.chartEl = null
     this.header = null
     this.innerChartText = null
+    this.innerChartSubtext = null
     this.createRoot()
+    if (initialSearchCoords) {
+      this.updateCompositionVis(
+        this.areaAround(
+          initialSearchCoords,
+          initialSearchRadius))
+    }
   }
 
   createRoot() {
+    this.chartEl = svg('g')
+    this.innerChartText = svg('text', {
+      'text-anchor': 'middle',
+      'color': 'black',
+      'font-family': 'sans',
+      'font-weight': 'bold',
+      'font-size': '16px',
+      x: this.radius, y: this.radius
+    }, svg.text(''))
+    this.innerChartSubtext = svg('text', {
+      'text-anchor': 'middle',
+      'color': 'black',
+      'font-family': 'sans',
+      'font-size': '12px',
+      x: this.radius, y: this.radius + 16
+    })
+
     this.svgEl = svg('svg', {
                    width: this.radius * 2,
                    height: this.radius * 2
-                 })
+                 }, 
+                  this.chartEl,
+                  this.innerChartText,
+                  this.innerChartSubtext)
+    const hoverStyles = 'path:hover{opacity:0.5}'
+    svg.append(this.svgEl, svg('style', {}, dom.text(hoverStyles)))
 
-    this.header = dom('h3', {}, dom.text('Nearby establishments'))
+    this.header = dom('h3', {}, dom.text('Nearby places'))
     this.header.className = styles.header
     this.rootEl = dom('div', {}, this.header, this.svgEl)
   }
@@ -53,30 +83,35 @@ export default class PlaceCompositionVis extends LightComponent {
   }
 
   // mutates area feature properties
-  calcAreaPlaceTypeDist(area) {
+  placesWithinArea(area) {
     let results = turf.collect(area, this.fbData,
                                'typeNum', 'placeTypes')
+    return results
+  }
 
-    if (this.filterTop) {
-      results.features[0].properties.placeTypes = 
-        results.features[0].properties.placeTypes.filter(typeNum => 
-          typeNum >= this.filterTop)
-    }
+  calcPlaceTypeCounts(areaPlaces) {
+    const nPlacesFound = areaPlaces.features[0].properties.placeTypes.length,
+          placeTypeCounts = areaPlaces.features[0].properties.placeTypes
+            .reduce((acc, typeNum) => {
+              if (typeof acc[typeNum] === 'undefined') {
+                return Object.assign(acc, {
+                  [typeNum]: 1
+                })
+              }
 
-    let nPlacesFound = results.features[0].properties.placeTypes.length,
-        placeTypeDist = results.features[0].properties.placeTypes
-          .reduce((acc, typeNum) => {
-            if (typeof acc[typeNum] === 'undefined') {
-              return Object.assign(acc, {
-                [typeNum]: 1/nPlacesFound
-              })
-            }
+              ++acc[typeNum]
+              return acc
+            }, {})
 
-            acc[typeNum] += 1/nPlacesFound
-            return acc
-          }, {})
+    return { counts: placeTypeCounts, total: nPlacesFound }
+  }
 
-    return placeTypeDist
+  typeDistFromCounts({ total, counts }) {
+    let dist = {}
+    Object.keys(counts).forEach(typeNum => 
+      dist[typeNum] = counts[typeNum] / total)
+
+    return dist
   }
 
   getTypeStr(typeNum) {
@@ -87,19 +122,23 @@ export default class PlaceCompositionVis extends LightComponent {
     return this.fbData.properties.placeTypes[typeNum].color
   }
 
-  updateCompositionVis(placeTypeDist) {
+  updateCompositionVis(searchArea) {
     let curOffset = 0,
         radius = this.radius,
         twopi = 2 * Math.PI,
         halfpi = Math.PI/2,
-        typeNums = Object.keys(placeTypeDist)
+        foundPlaces = this.placesWithinArea(searchArea),
+        typeCounts = this.calcPlaceTypeCounts(foundPlaces),
+        { counts, total } = typeCounts,
+        typeNums = Object.keys(counts),
+        placeTypeDist = this.typeDistFromCounts(typeCounts)
 
-    svg.clear(this.svgEl)
+    svg.clear(this.chartEl)
 
     if (typeNums.length === 0) {
       return
     } else if (typeNums.length === 1) {
-      svg.append(this.svgEl, svg('circle', {
+      svg.append(this.chartEl, svg('circle', {
         cx: radius, cy: radius,
         fill: this.getTypeColor(typeNums[0])
       }))
@@ -107,15 +146,14 @@ export default class PlaceCompositionVis extends LightComponent {
       typeNums
         .map(typeNum => ({
           color: this.getTypeColor(typeNum),
-          percent: placeTypeDist[typeNum]
+          percent: placeTypeDist[typeNum],
+          typeNum
         }))
         .sort(({ percent: a }, { percent: b }) => b - a)
-        .map(({ color, percent }) => {
+        .map(({ color, percent, typeNum }) => {
           const offset = curOffset
           curOffset += percent
-          return { color, percent, offset }
-        })
-        .map(({ color, percent, offset }) => {
+
           const startRads = twopi * offset,
             endRads = twopi * (offset + percent),
             startPoint = [
@@ -134,12 +172,19 @@ export default class PlaceCompositionVis extends LightComponent {
             `${endPoint.join(' ')} Z`
           ].join(' ')
 
-          return svg('path', {
+          const newPath = svg('path', {
             d: pathStr,
             fill: color
           })
+
+          newPath.onmouseover = () =>
+            this.setInnerText(counts[typeNum].toString(),
+                              this.getTypeStr(typeNum))
+          newPath.onmouseout = () => 
+            this.setInnerText(total.toString(), 'total')
+          return newPath
         })
-        .forEach(svg.append(this.svgEl))
+        .forEach(svg.append(this.chartEl))
       }
 
     const thickness = 20,
@@ -150,27 +195,22 @@ export default class PlaceCompositionVis extends LightComponent {
             fill: '#fff'
           })
 
-    svg.append(this.svgEl, whiteFill)
+    svg.append(this.chartEl, whiteFill)
+    this.setInnerText(total.toString(), 'total')
+  }
 
-    const hoverStyles = 'path:hover{opacity:0.5}'
-    svg.append(this.svgEl, svg('style', {}, dom.text(hoverStyles)))
-    this.innerChartText = svg('text', {
-      'text-anchor': 'middle',
-      color: 'black',
-      'font-family': 'sans',
-      x: this.radius, y: this.radius
-    }, svg.text(typeNums.length.toString()))
-    svg.append(this.svgEl, this.innerChartText)
+  setInnerText(text, subtext='') {
+    svg.text(this.innerChartText, text)
+    svg.text(this.innerChartSubtext, subtext)
   }
 
   addClickInteractivity() {
     this.initSearchLayer()
     this.map.on('click', e => {
-      let newSearchArea = this.areaAround(e.lngLat.toArray()),
-          placeTypeDist = this.calcAreaPlaceTypeDist(newSearchArea)
+      let newSearchArea = this.areaAround(e.lngLat.toArray())
       this.map.getSource('searchArea').setData(newSearchArea)
       this.map.setLayoutProperty('searchArea', 'visibility', 'visible')
-      this.updateCompositionVis(placeTypeDist)
+      this.updateCompositionVis(newSearchArea)
     })
   }
 }
