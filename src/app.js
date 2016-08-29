@@ -18,7 +18,6 @@ function initApp() {
 
   mapContainer.className = styles.mapContainer
   areaInfoBox.className = styles.areaInfoBox
-  areaInfoBox.textContent = 'Hello!'
   appRootElement.appendChild(mapContainer)
   appRootElement.appendChild(areaInfoBox)
 

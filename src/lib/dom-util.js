@@ -1,8 +1,15 @@
 const isString = x => (typeof x === 'string' || x instanceof String),
       toArr = xs => [].slice.call(xs)
 
-export default function dom(nodeName) {
-  return document.createElement(nodeName)
+export default function dom(nodeName, attrs) {
+  let newNode = document.createElement(nodeName)
+  if (attrs) {
+    for (const attr in attrs) {
+      newNode.setAttribute(attr, attrs[attr])
+    }
+  }
+
+  return newNode
 }
 
 export function append(node, child) {
@@ -52,3 +59,28 @@ export function text(node, txt) {
 Object.assign(dom, {
   append, clear, children, text
 })
+
+export function svg(nodeName, attrs) {
+  let newNode = document.createElementNS(svg.xmlns, nodeName)
+  if (attrs) {
+    svg.attr(newNode, attrs)
+  }
+
+  return newNode
+}
+
+svg.xmlns = 'http://www.w3.org/2000/svg'
+
+svg.attr = function svgAttr(node, attr, val) {
+  if (typeof attr === 'object') {
+    for (const a in attr) {
+      node.setAttributeNS(null, a, attr[a])
+    }
+    return node
+  }
+
+  node.setAttributeNS(null, attr, val)
+  return node
+}
+
+Object.assign(svg, { clear, children, append })

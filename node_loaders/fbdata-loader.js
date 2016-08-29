@@ -89,6 +89,15 @@ class FbDataParser {
           newNumMapping[this.placeTypeNums[typeStr]])
   }
 
+  assignColors() {
+    let hue = 0,
+        incr = 360 - 47
+    this.placeTypes.forEach(type => {
+      type.color = `hsl(${hue}, 100%, 60%)`
+      hue = (hue + incr) % 360
+    })
+  }
+
   toGeoJson() {
     let placePoints = []
     for (const { name, typeNum, nCheckins, lat, lon }
@@ -111,6 +120,7 @@ module.exports = function(fbPlaceCsv) {
   let fbdp = new FbDataParser()
   fbdp.parse(fbPlaceCsv)
   fbdp.optimizeTypeNums()
+  fbdp.assignColors()
   const geoJson = fbdp.toGeoJson()
   return `module.exports = ${JSON.stringify(geoJson)}`
 }
