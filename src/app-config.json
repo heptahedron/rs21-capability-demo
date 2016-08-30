@@ -1,8 +1,10 @@
 {
-  "mapboxAccessToken": "pk.eyJ1IjoiaGVwdGFoZWRyb24iLCJhIjoiY2lzOWthenMxMDAyczJvbzJpaHAwM3p4ayJ9.SEety9YReHEUPqZlJtoFbg",
   "mapConfig": {
+    "accessToken": "pk.eyJ1IjoiaGVwdGFoZWRyb24iLCJhIjoiY2lzOWthenMxMDAyczJvbzJpaHAwM3p4ayJ9.SEety9YReHEUPqZlJtoFbg",
     "style" : "mapbox://styles/mapbox/streets-v9",
-    "center": [-106.6056, 35.0853],
-    "zoom": 12
+    "initialView": {
+      "center": [-106.6056, 35.0853],
+      "zoom": 12
+    }
   }
 }

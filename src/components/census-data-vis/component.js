@@ -1,8 +1,23 @@
-import LightComponent from '../../lib/light-component'
-import dom from '../../lib/dom-util'
+import React from 'react'
+
 import styles from './styles.css'
 
-export default class CensusDataVis extends LightComponent {
+export default class CensusDataVis extends React.Component {
+  constructor(props) {
+    super(props)
+  }
+
+  render() {
+    return (
+      <div>
+        census data vis
+      </div>
+    )
+  }
+}
+
+/*
+class CensusDataVis {
   constructor(map, censusData) {
     super()
     this.map = map
@@ -91,3 +106,4 @@ export default class CensusDataVis extends LightComponent {
       this.layerSelector)
   }
 }
+*/
