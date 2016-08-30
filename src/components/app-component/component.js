@@ -1,10 +1,10 @@
 import React from 'react'
 import turf from 'turf'
 
+import { shallowClone, transformProps,  acceptKeys } from '../../lib/func-util'
+
 import MapboxGl from '../mapbox-gl/component'
-import FbPlaceVis, { 
-         makeLayers as makeFbDataLayers
-       } from '../fb-place-vis/component'
+import FbPlaceVis, { layers as fbLayers } from '../fb-place-vis/component'
 import CensusDataVis from '../census-data-vis/component'
 import TweetsVis from '../tweets-vis/component'
 
@@ -23,11 +23,9 @@ export default class AppComponent extends React.Component {
     super(props)
 
     const searchLayer = {
-            id: 'searchArea',
-            source: 'searchArea',
             type: 'fill',
             layout: {
-              //'visibility': 'none'
+              // 'visibility': 'none'
             },
             paint: {
               'fill-color': 'rgba(0,0,255,.3)'
@@ -38,21 +36,23 @@ export default class AppComponent extends React.Component {
 
     this.state = { 
       _map: null,
-      fbData: null,
-      censusData: null,
-      tweetData: null,
-      searchArea,
-      layers: [searchLayer]
+      sources: {
+        searchArea: {
+          data: searchArea,
+          layers: { searchLayer }
+        }
+      }
     }
   }
 
   componentWillMount() {
     const { awaitFbData, awaitCensusData, awaitTweetData } = this.props.data
     awaitFbData.then(fbData => {
-      const newLayers = this.state.layers
-        .concat(makeFbDataLayers('fbData'))
-      this.setState(
-        { fbData, layers: newLayers })
+      const updatedSources = shallowClone(this.state.sources, {
+        fbData: { data: fbData, layers: fbLayers }
+      })
+
+      this.setState({ sources: updatedSources })
     })
     awaitCensusData.then(censusData => {
       /*
@@ -60,7 +60,7 @@ export default class AppComponent extends React.Component {
         .concat(censusDataLayers('censusData'))
       this.setState({ censusData, layers: newLayers })
       */
-      this.setState({ censusData })
+      // this.setState({ censusData })
     })
     awaitTweetData.then(tweetData => {
       /*
@@ -68,18 +68,8 @@ export default class AppComponent extends React.Component {
         .concat(tweetDataLayers('tweetData'))
       this.setState({ tweetData, layers: newLayers })
       */
-      this.setState({ tweetData })
+      // this.setState({ tweetData })
     })
-  }
-
-  getSources() {
-    const keys = ['fbData', 'twitterData', 'censusData', 'searchArea'],
-          sources = keys
-            .filter(k => this.state[k])
-            .map(k => ({ [k]: this.state[k] }))
-            .reduce((o1, o2) => Object.assign(o1, o2), {})
-
-    return sources
   }
 
   handleMapReady(_map) {
@@ -131,6 +121,12 @@ export default class AppComponent extends React.Component {
     return this.fbData.properties.placeTypes[typeNum].color
   }
 
+  getData() {
+    return transformProps(
+      acceptKeys(this.state.sources, sourceId => sourceId.endsWith('Data')),
+      ({ data }) => data)
+  }
+
   render() {
     const {
             config: {
@@ -141,8 +137,10 @@ export default class AppComponent extends React.Component {
               }
             }
           } = this.props,
-          sources = this.getSources(),
-          layers = this.state.layers
+          { sources } = this.state,
+          { fbData,
+            twitterData,
+            censusData } = this.getData()
 
     return (
       <div className={styles.appContainer}>
@@ -150,25 +148,25 @@ export default class AppComponent extends React.Component {
           accessToken={accessToken}
           initialView={initialView}
           sources={sources}
-          layers={layers}
           style={mapStyle}
-          onMapReady={_map => this.handleMapReady(_map)} />
+          onMapReady={_map => this.handleMapReady(_map)}
+          ref={ref => window.mapboxglcomponent = ref}/>
         <div className={styles.visBox}>
           <p className={styles.helpText}>{HELP_TEXT}</p>
           <ul className={styles.visList}>
             <li>
               <FbPlaceVis
-                data={this.state.fbData}
+                data={fbData}
                 _map={this._map} />
             </li>
             <li>
               <CensusDataVis
-                data={this.state.censusData}
+                data={censusData}
                 _map={this._map} />
             </li>
             <li>
               <TweetsVis
-                data={this.state.tweetData}
+                data={twitterData}
                 _map={this._map} />
             </li>
           </ul>

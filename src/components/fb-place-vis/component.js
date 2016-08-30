@@ -145,10 +145,8 @@ export default class FbPlaceVis extends React.Component {
   }
 }
 
-export const makeLayers = source => [
-  {
-    id: 'checkinMagnitude',
-    source,
+export const layers = {
+  checkinMagnitude: {
     type: 'circle',
     paint: {
       'circle-radius': {
@@ -161,4 +159,4 @@ export const makeLayers = source => [
       'circle-opacity': .4
     }
   }
-]
+}
