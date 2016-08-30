@@ -27,20 +27,21 @@ export default class AppComponent extends React.Component {
             source: 'searchArea',
             type: 'fill',
             layout: {
-              'visibility': 'none'
+              //'visibility': 'none'
             },
             paint: {
               'fill-color': 'rgba(0,0,255,.3)'
             }
           },
-          { config: { mapConfig: { initialView: { center } } } } = this.props
+          { config: { mapConfig: { initialView: { center } } } } = this.props,
+          searchArea = this.areaAround(center, 10)
 
     this.state = { 
       _map: null,
       fbData: null,
       censusData: null,
       tweetData: null,
-      searchArea: this.areaAround(center, 10),
+      searchArea,
       layers: [searchLayer]
     }
   }
@@ -76,8 +77,8 @@ export default class AppComponent extends React.Component {
           sources = keys
             .filter(k => this.state[k])
             .map(k => ({ [k]: this.state[k] }))
-            .reduce((o1, o2) => { Object.assign(o1, o2) })
-    
+            .reduce((o1, o2) => Object.assign(o1, o2), {})
+
     return sources
   }
 

@@ -2,7 +2,7 @@ import React from 'react'
 import mapboxgl from 'mapbox-gl'
 import './mapbox-gl.css'
 
-import { not, inArr } from '../../lib/func-util'
+import { and, not, inArr } from '../../lib/func-util'
 
 import styles from './styles.css'
 
@@ -14,6 +14,7 @@ export default class MapboxGl extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
+    console.log(nextProps)
     if (!this.mapLoaded) {
       // map load handler will see most recent props
       return
