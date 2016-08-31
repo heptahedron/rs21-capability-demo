@@ -18,19 +18,18 @@ export default class FbPlaceVis extends React.Component {
   }
 
   render() {
-    const sideLength = 150,
+    const diameter = 150,
           pieChart = this.props.data ? (
-            <svg width={sideLength} height={sideLength}>
+            <svg width={diameter} height={diameter}>
               <PieChartSvg
-                sideLength={sideLength} 
-                data={this.props.data.placeTypes}
+                diameter={diameter} 
+                data={this.props.data.properties.placeTypes}
                 quantity="nCheckins"
-                sorted="nCheckins"
+                sorted="nCheckins" descending
                 keyed="typeStr" />
             </svg>
           ) : null
 
-    console.log('pieChart', pieChart, this.props.data)
     return (
       <div className={styles.container}>
         {pieChart}

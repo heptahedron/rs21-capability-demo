@@ -1,3 +1,5 @@
+import { vec } from '../../lib/matrix-util'
+
 import React from 'react'
 
 export default class PieChartSvg extends React.Component {
@@ -5,7 +7,14 @@ export default class PieChartSvg extends React.Component {
     let processedData = this.props.data.slice()
 
     if (this.props.sorted) {
-      processedData.sort((a, b) => a[this.props.sorted] - b[this.props.sorted])
+      let sortFunc = null
+      if (this.props.descending) {
+        sortFunc = (a, b) => b[this.props.sorted] - a[this.props.sorted]
+      } else {
+        sortFunc = (a, b) => a[this.props.sorted] - b[this.props.sorted]
+      }
+
+      processedData.sort(sortFunc)
     } else if (this.props.sortedFunc) {
       processedData.sort(this.props.sortedFunc)
     }
@@ -37,7 +46,7 @@ export default class PieChartSvg extends React.Component {
     let hue = 0
     const defaultColorFunc = i => {
       const c = `hsl(${hue},100%,50%)`
-      hue += 360 - 43
+      hue = (hue + 257) % 360
       return c
     }
 
@@ -49,66 +58,40 @@ export default class PieChartSvg extends React.Component {
     return vector.map(x => x / total)
   }
 
-  fractionToRads(f) {
-    return 2 * Math.PI * f
-  }
+  sectorPathStr(frac) {
+    const innerRadius = this.props.innerRadius || .75,
+          largeArc = frac > .5 ? '1': '0',
+          angle = 2 * Math.PI * frac,
+          outerEnd = [Math.cos(angle), Math.sin(angle)],
+          innerEnd = vec.scale(outerEnd, innerRadius)
 
-  radsToPoint(r) {
-    return [Math.cos(r), Math.sin(r)]
-  }
-
-  scaleFunc(radius) {
-    return point => {
-      point[0] *= radius
-      point[1] *= radius
-    }
-  }
-
-  toPathStrCoords(point) {
-    point[0] = point[0].toFixed(2)
-    point[1] = point[1].toFixed(2)
-  }
-
-  sectorPathStr(frac, offset, radius) {
-    let startAngle = this.fractionToRads(offset),
-        endAngle = this.fractionToRads(offset + frac),
-        startPoint = this.radsToPoint(startAngle),
-        endPoint = this.radsToPoint(endAngle),
-        largeArcFlag = Math.abs(frac) > .5 ? '1' : '0',
-        sweepFlag = frac > 0 ? '0' : '1'
-
-    startPoint[0] = 1 + startPoint[0]
-    startPoint[1] = 1 - startPoint[1] // canvas coords increase down
-    endPoint[0] = 1 + endPoint[0]
-    endPoint[1] = 1 - endPoint[1]
-    ;[startPoint, endPoint].forEach(this.scaleFunc(radius))
-    ;[startPoint, endPoint].forEach(this.toPathStrCoords)
-    
     return [
-      `M ${radius} ${radius}`,
-      `L ${startPoint[0]} ${startPoint[1]}`,
-      `A ${radius} ${radius} 0 ${largeArcFlag} ${sweepFlag}`,
-      `${endPoint[0]} ${endPoint[1]} Z`
+      `M ${innerRadius} 0 L 1 0`,
+      `A 1 1 0 ${largeArc} 0 ${outerEnd.join(' ')}`,
+      `L ${innerEnd.join(' ')}`,
+      `A ${innerRadius} ${innerRadius} 0 ${largeArc} 1 ${innerRadius} 0 Z`
     ].join(' ')
   }
 
   createSectors() {
     let curOffset = 0,
-        radius = this.props.sideLength / 2,
         color = this.getColorFunc(),
-        keyFunc = this.getKeyFunc()
+        keyFunc = this.getKeyFunc(),
+        data = this.getProcessedData()
     
-    const sectors = this.getProcessedData()
+    const sectors = this.normalize(data)
       .map((frac, i) => {
         const offset = curOffset,
-              pathStr = this.sectorPathStr(frac, offset, radius)
+              pathStr = this.sectorPathStr(frac),
+              transform = `rotate(${360 * offset})` 
         curOffset += frac
 
         return (
           <path
             key={keyFunc(this.props.data[i])}
             d={pathStr}
-            fill={color(this.props.data[i])} />
+            fill={color(this.props.data[i])}
+            transform={transform} />
         )
       })
 
@@ -116,8 +99,12 @@ export default class PieChartSvg extends React.Component {
   }
 
   render() {
+    const diameter = this.props.diameter || 150,
+          radius = diameter / 2,
+          transform = "matrix(%, 0, 0, -%, %, %)"
+            .replace(/%/g, radius.toFixed(2))
     return (
-      <g>
+      <g transform={transform}>
         {this.createSectors()}
       </g>
     )
