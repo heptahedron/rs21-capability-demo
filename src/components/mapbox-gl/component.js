@@ -94,6 +94,12 @@ export default class MapboxGl extends React.Component {
     this._map.removeLayer(this._layerId(sourceId, layerId))
   }
 
+  handleClick(e) {
+    if (this.props.onClick) {
+      this.props.onClick(e)
+    }
+  }
+
   mountMap(node) {
     const { accessToken, style,
             initialView: { center, zoom } } = this.props
@@ -114,6 +120,8 @@ export default class MapboxGl extends React.Component {
       this.mapLoaded = true
       this.props.onMapReady(this._map)
     })
+
+    this._map.on('click', e => this.handleClick(e))
   }
 
   render() {

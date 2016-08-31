@@ -1,79 +1,65 @@
 import React from 'react'
 import turf from 'turf'
 
-import { shallowClone, transformProps,  acceptKeys } from '../../lib/func-util'
+import { mapPairs,
+         shallowClone,
+         transformProps,
+         acceptKeys } from '../../lib/func-util'
 
 import MapboxGl from '../mapbox-gl/component'
-import FbPlaceVis, { layers as fbLayers } from '../fb-place-vis/component'
+import FbPlaceVis from '../fb-place-vis/component'
 import CensusDataVis from '../census-data-vis/component'
 import TweetsVis from '../tweets-vis/component'
 
+import { searchLayer } from './map-layers'
 import styles from './styles.css'
-
-const HELP_TEXT = `
-Click anywhere on the map to see the types of Facebook places within a 1km
-radius. Each black circle represents one such place, and their size indicate
-the relative number of people who have checked in at that place. Selecting
-an option under 'Nearby people' will color the map more intensely in areas
-where the measure is higher.
-`.replace('\n', '')
 
 export default class AppComponent extends React.Component {
   constructor(props) {
     super(props)
 
-    const searchLayer = {
-            type: 'fill',
-            layout: {
-              // 'visibility': 'none'
-            },
-            paint: {
-              'fill-color': 'rgba(0,0,255,.3)'
-            }
-          },
-          { config: { mapConfig: { initialView: { center } } } } = this.props,
+    const { config: { mapConfig: { initialView: { center } } } } = this.props,
           searchArea = this.areaAround(center, 10)
 
     this.state = { 
       _map: null,
       sources: {
-        searchArea: {
+        /*searchArea: {
           data: searchArea,
           layers: { searchLayer }
-        }
+        }*/
       }
     }
   }
 
-  componentWillMount() {
-    const { awaitFbData, awaitCensusData, awaitTweetData } = this.props.data
-    awaitFbData.then(fbData => {
-      const updatedSources = shallowClone(this.state.sources, {
-        fbData: { data: fbData, layers: fbLayers }
-      })
+  updateSource(sourceId, source) {
+    const updatedSources = shallowClone(this.state.sources, {
+      [sourceId]: source
+    })
 
-      this.setState({ sources: updatedSources })
-    })
-    awaitCensusData.then(censusData => {
-      /*
-      const newLayers = this.state.layers
-        .concat(censusDataLayers('censusData'))
-      this.setState({ censusData, layers: newLayers })
-      */
-      // this.setState({ censusData })
-    })
-    awaitTweetData.then(tweetData => {
-      /*
-      const newLayers = this.state.layers
-        .concat(tweetDataLayers('tweetData'))
-      this.setState({ tweetData, layers: newLayers })
-      */
-      // this.setState({ tweetData })
+    this.setState({ sources: updatedSources })
+  }
+
+  componentWillMount() {
+    const fmt = /^await([A-Z])(.*)/,
+          canonical = str =>
+            str.replace(fmt, (_, f, rest) => f.toLowerCase() + rest),
+          sourcePromises = mapPairs(this.props.sources,
+            ([key, source]) => [canonical(key), source])
+
+    sourcePromises.forEach(([sourceId, awaitSource]) => {
+      awaitSource.then(source => {
+        console.log(sourceId, source)
+        this.updateSource(sourceId, source)
+      })
     })
   }
 
   handleMapReady(_map) {
     this._map = _map
+  }
+
+  handleMapClick(e) {
   }
 
   areaAround([lng, lat], radius=1) {
@@ -117,10 +103,6 @@ export default class AppComponent extends React.Component {
     return this.fbData.properties.placeTypes[typeNum].typeStr
   }
 
-  getTypeColor(typeNum) {
-    return this.fbData.properties.placeTypes[typeNum].color
-  }
-
   getData() {
     return transformProps(
       acceptKeys(this.state.sources, sourceId => sourceId.endsWith('Data')),
@@ -150,24 +132,21 @@ export default class AppComponent extends React.Component {
           sources={sources}
           style={mapStyle}
           onMapReady={_map => this.handleMapReady(_map)}
+          onClick={e => this.handleMapClick(e)}
           ref={ref => window.mapboxglcomponent = ref}/>
         <div className={styles.visBox}>
-          <p className={styles.helpText}>{HELP_TEXT}</p>
           <ul className={styles.visList}>
             <li>
               <FbPlaceVis
-                data={fbData}
-                _map={this._map} />
+                data={fbData} />
             </li>
             <li>
               <CensusDataVis
-                data={censusData}
-                _map={this._map} />
+                data={censusData} />
             </li>
             <li>
               <TweetsVis
-                data={twitterData}
-                _map={this._map} />
+                data={twitterData} />
             </li>
           </ul>
         </div>
