@@ -1,16 +1,36 @@
 import React from 'react'
 
 export default class PieChartSvg extends React.Component {
-  extractNumbers() {
-    if (this.props.dataFunc) {
-      return this.props.data.map(dataFunc)
+  getProcessedData() {
+    let processedData = this.props.data.slice()
+
+    if (this.props.sorted) {
+      processedData.sort((a, b) => a[this.props.sorted] - b[this.props.sorted])
+    } else if (this.props.sortedFunc) {
+      processedData.sort(this.props.sortedFunc)
     }
 
-    return this.props.data.slice()
+    if (this.props.quantity) {
+      processedData = processedData.map(d => d[this.props.quantity])
+    } else if (this.props.quantityFunc) {
+      processedData = processedData.map(quantityFunc)
+    }
+
+    return processedData
+  }
+
+  getKeyFunc() {
+    if (this.props.keyed) {
+      return d => d[this.props.keyed]
+    } else if (this.props.keyFunc) {
+      return this.props.keyFunc
+    }
   }
 
   getColorFunc() {
-    if (this.props.colorFunc) {
+    if (this.props.color) {
+      return d => d[this.props.color]
+    } else if (this.props.colorFunc) {
       return this.props.colorFunc
     }
 
@@ -18,6 +38,7 @@ export default class PieChartSvg extends React.Component {
     const defaultColorFunc = i => {
       const c = `hsl(${hue},100%,50%)`
       hue += 360 - 43
+      return c
     }
 
     return defaultColorFunc
@@ -73,18 +94,21 @@ export default class PieChartSvg extends React.Component {
 
   createSectors() {
     let curOffset = 0,
-        nums = this.extractNumbers(),
-        radius = this.props.sideLength / 2
-        color = this.getColorFunc()
+        radius = this.props.sideLength / 2,
+        color = this.getColorFunc(),
+        keyFunc = this.getKeyFunc()
     
-    const sectors = this.normalize(this.nums)
+    const sectors = this.getProcessedData()
       .map((frac, i) => {
         const offset = curOffset,
               pathStr = this.sectorPathStr(frac, offset, radius)
         curOffset += frac
 
         return (
-          <path d={pathStr} fill={color(this.data[i], i)} />
+          <path
+            key={keyFunc(this.props.data[i])}
+            d={pathStr}
+            fill={color(this.props.data[i])} />
         )
       })
 

@@ -1,7 +1,8 @@
 import React from 'react'
 import turf from 'turf'
 
-import { mapPairs,
+import { observe,
+         mapPairs,
          shallowClone,
          transformProps,
          acceptKeys } from '../../lib/func-util'
@@ -49,7 +50,6 @@ export default class AppComponent extends React.Component {
 
     sourcePromises.forEach(([sourceId, awaitSource]) => {
       awaitSource.then(source => {
-        console.log(sourceId, source)
         this.updateSource(sourceId, source)
       })
     })
@@ -104,9 +104,11 @@ export default class AppComponent extends React.Component {
   }
 
   getData() {
-    return transformProps(
-      acceptKeys(this.state.sources, sourceId => sourceId.endsWith('Data')),
-      ({ data }) => data)
+    return Object.keys(this.state.sources)
+            .filter(sourceId => sourceId.endsWith('Data'))
+            .map(sourceId => 
+              ({ [sourceId]: this.state.sources[sourceId].data }))
+            .reduce((o1, o2) => Object.assign(o1, o2), {})
   }
 
   render() {

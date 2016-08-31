@@ -32,9 +32,9 @@ export function keysUnion(o1, o2) {
 }
 
 export function acceptKeys(o1, keys) {
-  return (typeof keys === 'function'
+  return Object.assign({}, ...(typeof keys === 'function'
           ? Object.keys(o1).filter(k => keys(k))
-          : Object.keys(o1).filter(inArr(keys)))
+          : Object.keys(o1).filter(inArr(keys))))
 }
 
 export function compareKeys(o1, o2) {
@@ -91,4 +91,9 @@ export function shallowClone(obj, ...newProps) {
 export function transformProps(obj, f) {
   Object.keys(obj).forEach(key => obj[key] = f(obj[key], key))
   return obj
+}
+
+export function observe(x) {
+  console.log(x)
+  return x
 }

@@ -1,6 +1,7 @@
 export const fbLayers = {
   checkinMagnitude: {
     type: 'circle',
+    layout: { visibility: 'none' },
     paint: {
       'circle-radius': {
         property: 'nCheckins',

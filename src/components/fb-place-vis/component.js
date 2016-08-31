@@ -10,22 +10,27 @@ export default class FbPlaceVis extends React.Component {
   }
 
   getData() {
-    return (this.props.fbData.properties.placeTypes
-      .map(placeType => placeType[nCheckins]))
+    return this.props.data.properties.placeTypes
   }
 
   getTypeColor(typeNum) {
-    return this.props.fbData.properties.placeTypes[typeNum].color
+    return this.props.data.properties.placeTypes[typeNum].color
   }
 
   render() {
     const sideLength = 150,
-          pieChart = this.props.fbData ? (
+          pieChart = this.props.data ? (
             <svg width={sideLength} height={sideLength}>
-              <PieChart data={this.getData()} sideLength={sideLength} />
+              <PieChartSvg
+                sideLength={sideLength} 
+                data={this.props.data.placeTypes}
+                quantity="nCheckins"
+                sorted="nCheckins"
+                keyed="typeStr" />
             </svg>
           ) : null
 
+    console.log('pieChart', pieChart, this.props.data)
     return (
       <div className={styles.container}>
         {pieChart}

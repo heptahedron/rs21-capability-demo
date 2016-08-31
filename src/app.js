@@ -15,7 +15,7 @@ function initApp() {
               data,
               layers: fbLayers
             }))}),
-        awaitCensusData = new Promise((resolve, reject) => {
+        /*awaitCensusData = new Promise((resolve, reject) => {
           require(['!!censusdata!../data/BernallioCensusBlocks_Joined.json'],
             data => resolve({
               data,
@@ -27,7 +27,8 @@ function initApp() {
               data,
               layers: twitterLayers
             }))}),
-        sources = { awaitFbData, awaitCensusData, awaitTweetData }
+        sources = { awaitFbData, awaitCensusData, awaitTweetData }*/
+        sources = { awaitFbData }
 
   appMountPoint.className = styles.reactRoot
   document.body.appendChild(appMountPoint)
