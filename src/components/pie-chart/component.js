@@ -2,7 +2,7 @@ import { vec } from '../../lib/matrix-util'
 
 import React from 'react'
 
-export default class PieChartSvg extends React.Component {
+export default class PieChart extends React.Component {
   getProcessedData() {
     let processedData = this.props.data.slice()
 

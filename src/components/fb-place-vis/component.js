@@ -1,6 +1,6 @@
 import React from 'react'
 
-import PieChartSvg from '../pie-chart-svg/component'
+import PieChart from '../pie-chart/component'
 
 import styles from './styles.css'
 
@@ -20,7 +20,7 @@ export default class FbPlaceVis extends React.Component {
   render() {
     const diameter = 150,
           pieChart = this.props.data ? (
-            <PieChartSvg
+            <PieChart
               diameter={diameter} 
               innerRadius={0}
               data={this.props.data.properties.placeTypes}
