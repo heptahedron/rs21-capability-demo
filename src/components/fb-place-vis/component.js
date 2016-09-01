@@ -9,24 +9,13 @@ export default class FbPlaceVis extends React.Component {
     super(props)
   }
 
-  getData() {
-    return this.props.data.properties.placeTypes
-  }
-
-  getTypeColor(typeNum) {
-    return this.props.data.properties.placeTypes[typeNum].color
-  }
-
   render() {
-    const diameter = 150,
-          pieChart = this.props.data ? (
+    const pieChart = this.props.data ? (
             <PieChart
-              diameter={diameter} 
-              innerRadius={0}
+              diameter={150} 
+              sectorWidth={0}
               data={this.props.data.properties.placeTypes}
-              quantity="nCheckins"
-              sorted="nCheckins" descending
-              keyed="typeStr" />
+              className={styles.placeChart} />
           ) : null
 
     return (

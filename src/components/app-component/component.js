@@ -128,6 +128,7 @@ export default class AppComponent extends React.Component {
 
     return (
       <div className={styles.appContainer}>
+      {/*
         <MapboxGl
           accessToken={accessToken}
           initialView={initialView}
@@ -135,7 +136,7 @@ export default class AppComponent extends React.Component {
           style={mapStyle}
           onMapReady={_map => this.handleMapReady(_map)}
           onClick={e => this.handleMapClick(e)}
-          ref={ref => window.mapboxglcomponent = ref}/>
+          ref={ref => window.mapboxglcomponent = ref}/>*/}
         <div className={styles.visBox}>
           <ul className={styles.visList}>
             <li>

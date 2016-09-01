@@ -90,8 +90,8 @@ class FbDataParser {
   }
 
   assignColors() {
-    let hue = 0,
-        incr = 360 - 47
+    let hue = 150,
+        incr = 257
     this.placeTypes.forEach(type => {
       type.color = `hsl(${hue}, 100%, 60%)`
       hue = (hue + incr) % 360
