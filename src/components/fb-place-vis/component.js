@@ -20,14 +20,13 @@ export default class FbPlaceVis extends React.Component {
   render() {
     const diameter = 150,
           pieChart = this.props.data ? (
-            <svg width={diameter} height={diameter}>
-              <PieChartSvg
-                diameter={diameter} 
-                data={this.props.data.properties.placeTypes}
-                quantity="nCheckins"
-                sorted="nCheckins" descending
-                keyed="typeStr" />
-            </svg>
+            <PieChartSvg
+              diameter={diameter} 
+              innerRadius={0}
+              data={this.props.data.properties.placeTypes}
+              quantity="nCheckins"
+              sorted="nCheckins" descending
+              keyed="typeStr" />
           ) : null
 
     return (
