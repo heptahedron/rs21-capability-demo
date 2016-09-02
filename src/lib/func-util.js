@@ -31,10 +31,10 @@ export function keysUnion(o1, o2) {
             .filter(key => hasKey(o1, key)))
 }
 
-export function acceptKeys(o1, keys) {
-  return Object.assign({}, ...(typeof keys === 'function'
-          ? Object.keys(o1).filter(k => keys(k))
-          : Object.keys(o1).filter(inArr(keys))))
+export function takeKeys(obj, keys) {
+  return Object.keys(obj)
+    .filter(typeof keys === 'function' ? k => keys(k) : k => keys[k])
+    .reduce((res, k) => { res[k] = obj[k]; return res }, {})
 }
 
 export function compareKeys(o1, o2) {
@@ -93,7 +93,7 @@ export function transformProps(obj, f) {
   return obj
 }
 
-export function observe(x) {
-  console.log(x)
-  return x
+export function observe(...x) {
+  console.log(...x)
+  return x[0]
 }

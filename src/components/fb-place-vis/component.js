@@ -1,6 +1,6 @@
 import React from 'react'
 
-import PieChart from '../pie-chart/component'
+import { PieChart, Sector } from '../pie-chart/component'
 
 import styles from './styles.css'
 
@@ -14,9 +14,13 @@ export default class FbPlaceVis extends React.Component {
             <PieChart
                 size={150} 
                 data={this.props.data.properties.placeTypes}
-                keyed="nCheckins"
                 className={styles.placeChart}>
-              <Sector innerRadius={0} />
+              <Sector radius={75} innerRadius={75*.75}
+                value="nCheckins"
+                sorted="nCheckins"
+                keyed="typeStr"
+                // color="color" />
+                />
             </PieChart>
           ) : null
 

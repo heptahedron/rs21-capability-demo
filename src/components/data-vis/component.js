@@ -12,6 +12,8 @@ export default class DataVis extends React.Component {
 
       const deeperGetter = this.makeValueGetter(_prop.slice(1))
       return data => deeperGetter(data[_prop[0]])
+    } else if (typeof _prop === 'function') {
+      return data => _prop(data)
     } 
   }
 
@@ -38,13 +40,45 @@ export default class DataVis extends React.Component {
       sign = -1
     }
 
-    if (sort === true) {
+    if (_sort === true) {
       return (a, b) => a < b ? -sign : sign
-    } else if (typeof _sort === 'string' || typeof _sort === 'number') {
+    } else if (typeof _sort === 'string' || typeof _sort === 'number'
+               || typeof _sort === 'function') {
       const val = this.makeValueGetter(_sort)
       return (a, b) => val(a) < val(b) ? -sign : sign
-    } else if (Array.isArray(_sort) && !Array.isArray(_sort[0])) {
+    } else if (Array.isArray(_sort)) {
+      const val = this.makeValueGetter(_sort[0])
+      if (_sort.length === 1) {
+        return (a, b) => val(a) < val(b) ? -sign : sign
+      }
 
+      const nextComparator = this.makeComparator(_sort.slice(1),
+                                                 nextDescending)
+      return (a, b) => {
+        const valA = val(a), valB = val(b)
+        return (valA < valB
+                ? -sign
+                : valA > valB
+                  ? sign
+                  : nextComparator(a, b))
+      }
     }
-  } 
+  }
+
+  sortedByProp(data, sortProp='sorted', descProp='descending') {
+    if (this.props[sortProp]) {
+      return data.slice()
+        .sort(this.makeComparator(this.props[sortProp], this.props[descProp]))
+    }
+
+    return data
+  }
+
+  filteredByProp(data, filterProp='filtered') {
+    if (this.props[filterProp]) {
+      return data.filter(this.makeFilter(this.props[filterProp]))
+    }
+
+    return data
+  }
 }

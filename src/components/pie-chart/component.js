@@ -2,11 +2,12 @@ import React from 'react'
 
 import DataVis from '../data-vis/component'
 
+import { observe, takeKeys } from '../../lib/func-util'
 import { vec } from '../../lib/matrix-util'
 
-export default class PieChart extends DataVis {
+export class PieChart extends DataVis {
   getSectorElement() {
-    const sector = React.Children(this.props.children).toArray()
+    const sector = React.Children.toArray(this.props.children)
       .filter(child => child.type === Sector)
     
     if (sector.length > 1) throw "Only one Sector definition per PieChart!"
@@ -15,33 +16,30 @@ export default class PieChart extends DataVis {
   }
 
   makeSectors() {
-    const SectorElement = this.getSectorElement(),
-          data = this.getData(),
+    const sectorElement = this.getSectorElement(),
+          data = this.sortedByProp(this.filteredByProp(this.props.data))
 
+    return React.cloneElement(sectorElement, { data })
   }
 
   render() {
     const size      = this.props.size,
           radius    = size / 2,
-          className = this.props.className || '',
-          viewBox   = `${-radius} ${-radius} ${size} ${size}`
+          className = this.props.className || ''
 
     return (
-      <svg width={size} height={size} viewBox={viewBox} className={className}>
+      <svg width={size} height={size} viewBox="-1 -1 2 2"
+        className={className}>
         {this.makeSectors()}
       </svg>
     )
   }
 }
 
-PieChart.defaultSector = <Sector innerRadius={0} />
-
 export class Sector extends DataVis {
   getColorFunc() {
     if (this.props.color) {
-      return d => d[this.props.color]
-    } else if (this.props.colorFunc) {
-      return this.props.colorFunc
+      return this.makeValueGetter(this.props.color)
     }
 
     let hue = 0
@@ -55,7 +53,7 @@ export class Sector extends DataVis {
   }
 
   pathStr(innerRadius, angle) {
-    const largeArc = frac > .5 ? '1': '0',
+    const largeArc = angle > Math.PI ? '1': '0',
           outerEnd = [Math.cos(angle), Math.sin(angle)],
           innerEnd = vec.scale(outerEnd, innerRadius),
           [oeStr, ieStr] = [outerEnd, innerEnd].map(v => v.join(' ')),
@@ -73,14 +71,34 @@ export class Sector extends DataVis {
   render() {
     let curOffset = 0
     const radius = this.props.radius,
-          innerRadius = this.props.innerRadius,
-          data = this.getData()
+          innerRadius = this.props.innerRadius / radius,
+          data = this.sortedByProp(this.filteredByProp(this.props.data)),
+          values = data.map(this.makeValueGetter(this.props.value)),
+          key = this.props.keyed
+                ? this.makeValueGetter(this.props.keyed)
+                : (m => d => m.get(d))(new WeakMap(data.map((d, i) => [d, i]))),
+          total = values.reduce((a, b) => a + b),
+          fracs = values.map(v => v / total),
+          color = this.getColorFunc(),
+          twoPi = 2 * Math.PI,
+          paths = data.map((d, i) => {
+            const angleRads = twoPi * fracs[i],
+                  angleDegs = 360 * fracs[i],
+                  path = <path 
+                           d={this.pathStr(innerRadius, angleRads)}
+                           fill={color(d)}
+                           key={key(d)}
+                           transform={`rotate(${curOffset})`} />
 
-    return (
-      <path {...this.props} d={pathStr} />
-    )
+            curOffset += angleDegs
+            return path
+          })
+
+    return (<g>{paths}</g>)
   }
 }
+
+PieChart.defaultSector = <Sector innerRadius={0} />
 
 Sector.defaultProps = {
   innerRadius: 0

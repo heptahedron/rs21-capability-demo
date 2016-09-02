@@ -5,7 +5,7 @@ import { observe,
          mapPairs,
          shallowClone,
          transformProps,
-         acceptKeys } from '../../lib/func-util'
+         takeKeys } from '../../lib/func-util'
 
 import MapboxGl from '../mapbox-gl/component'
 import FbPlaceVis from '../fb-place-vis/component'
@@ -104,11 +104,10 @@ export default class AppComponent extends React.Component {
   }
 
   getData() {
-    return Object.keys(this.state.sources)
-            .filter(sourceId => sourceId.endsWith('Data'))
-            .map(sourceId => 
-              ({ [sourceId]: this.state.sources[sourceId].data }))
-            .reduce((o1, o2) => Object.assign(o1, o2), {})
+    return transformProps(
+             takeKeys(this.state.sources,
+                      key => key.endsWith('Data')),
+             source => source.data)
   }
 
   render() {
