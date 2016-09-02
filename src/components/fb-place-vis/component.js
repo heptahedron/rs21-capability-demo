@@ -12,10 +12,12 @@ export default class FbPlaceVis extends React.Component {
   render() {
     const pieChart = this.props.data ? (
             <PieChart
-              diameter={150} 
-              sectorWidth={0}
-              data={this.props.data.properties.placeTypes}
-              className={styles.placeChart} />
+                size={150} 
+                data={this.props.data.properties.placeTypes}
+                keyed="nCheckins"
+                className={styles.placeChart}>
+              <Sector innerRadius={0} />
+            </PieChart>
           ) : null
 
     return (
