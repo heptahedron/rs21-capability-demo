@@ -6,16 +6,20 @@ import { observe, takeKeys } from '../../lib/func-util'
 import { vec } from '../../lib/matrix-util'
 
 export class PieChart extends DataVis {
+  getDefaultSector() {
+    return <Sector radius={this.props.size / 2} />
+  }
+
   getSectorElement() {
     const sector = React.Children.toArray(this.props.children)
       .filter(child => child.type === Sector)
     
     if (sector.length > 1) throw "Only one Sector definition per PieChart!"
 
-    return sector[0] || this.constructor.defaultSector
+    return sector[0] || this.getDefaultSector()
   }
 
-  makeSectors() {
+  renderSectors() {
     const sectorElement = this.getSectorElement(),
           data = this.sortedByProp(this.filteredByProp(this.props.data))
 
@@ -24,16 +28,19 @@ export class PieChart extends DataVis {
 
   render() {
     const size      = this.props.size,
-          radius    = size / 2,
           className = this.props.className || ''
 
     return (
       <svg width={size} height={size} viewBox="-1 -1 2 2"
-        className={className}>
-        {this.makeSectors()}
+        {...this.inheritedProps()}>
+        {this.renderSectors()}
       </svg>
     )
   }
+}
+
+PieChart.defaultProps = {
+  size: 150
 }
 
 export class Sector extends DataVis {
@@ -88,7 +95,8 @@ export class Sector extends DataVis {
                            d={this.pathStr(innerRadius, angleRads)}
                            fill={color(d)}
                            key={key(d)}
-                           transform={`rotate(${curOffset})`} />
+                           transform={`rotate(${curOffset})`}
+                           {...this.inheritedProps()} />
 
             curOffset += angleDegs
             return path
@@ -97,8 +105,6 @@ export class Sector extends DataVis {
     return (<g>{paths}</g>)
   }
 }
-
-PieChart.defaultSector = <Sector innerRadius={0} />
 
 Sector.defaultProps = {
   innerRadius: 0

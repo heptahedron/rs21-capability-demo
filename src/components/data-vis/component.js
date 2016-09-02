@@ -1,5 +1,7 @@
 import React from 'react'
 
+import { takeKeys } from '../../lib/func-util'
+
 export default class DataVis extends React.Component {
   makeValueGetter(_prop) {
     if (typeof _prop === 'string'
@@ -74,11 +76,13 @@ export default class DataVis extends React.Component {
     return data
   }
 
-  filteredByProp(data, filterProp='filtered') {
-    if (this.props[filterProp]) {
-      return data.filter(this.makeFilter(this.props[filterProp]))
-    }
+  getPropFilter() {
+    return 
+  }
 
-    return data
+  filteredProps(filter=) {
+    return takeKeys(this.props, prop => )
   }
 }
+
+DataVis.defaultPropFilter = { data: false,  }
