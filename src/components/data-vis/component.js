@@ -21,10 +21,11 @@ export default class DataVis extends React.Component {
 
   makeFilter(_filter) {
     if (typeof _filter === 'string'
-        || typeof _filter === 'number') {
-      return data => data.filter(d => d[_filter])
+        || typeof _filter === 'number'
+        || Array.isArray(_filter)) {
+      return filterVal = this.makeValueGetter(_prop)
     } else if (typeof _filter === 'function') {
-      return data => data.filter(_filter)
+      return _filter
     }
   }
 
@@ -76,13 +77,69 @@ export default class DataVis extends React.Component {
     return data
   }
 
-  getPropFilter() {
-    return 
+  filteredByProp(data, filterProp='filter') {
+    if (this.props[filterProp]) {
+      return data.filter(this.makeFilter(this.props[filterProp]))
+    }
+
+    return data
   }
 
-  filteredProps(filter=) {
-    return takeKeys(this.props, prop => )
+  getColorGetter(colorProp='color') {
+    if (this.props[colorProp]) {
+      return this.makeValueGetter(this.props[colorProp])
+    }
+
+    let hue = 0,
+        colorMap = new WeakMap(),
+        genColor = () => {
+          const c = `hsl(${hue},100%,50%)`
+          hue = (hue + 257) % 360
+          return c
+        }
+
+    return d => (colorMap.has(d)
+                 ? colorMap.get(d)
+                 : colorMap.set(d, genColor()).get(d))
+  }
+
+  getData(dataProp='data') {
+    return this.sortedByProp(this.filteredByProp(this.props[dataProp]))
+  }
+
+  getValuesFromData(data, valueProp='value') {
+    if (this.props[valueProp]) {
+      return data.map(this.makeValueGetter(this.props[valueProp]))
+    }
+
+    return data
+  }
+
+  makeKeyGetter(keyProp='keyed') {
+    if (this.props.keyed) {
+      return this.makeValueGetter(this.props.keyed)
+    }
+
+    let curKey = 0, keyMap = new WeakMap()
+    
+    return d => (keyMap.has(d) 
+                 ? keyMap.get(d)
+                 : keyMap.set(d, curKey++).get(d))
+  }
+
+  getPropBlacklist() {
+    return DataVis.defaultPropFilter
+  }
+
+  getAllowedProps(blacklist=this.getPropBlacklist()) {
+    return takeKeys(this.props, prop => !blacklist[prop])
   }
 }
 
-DataVis.defaultPropFilter = { data: false,  }
+DataVis.defaultPropBlacklist = {
+  data: true,
+  value: true,
+  keyed: true,
+  sorted: true,
+  color: true
+}

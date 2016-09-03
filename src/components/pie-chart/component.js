@@ -19,6 +19,10 @@ export class PieChart extends DataVis {
     return sector[0] || this.getDefaultSector()
   }
 
+  getPropBlacklist() {
+    return this.constructor.defaultPropBlacklist
+  }
+
   renderSectors() {
     const sectorElement = this.getSectorElement(),
           data = this.sortedByProp(this.filteredByProp(this.props.data))
@@ -27,38 +31,25 @@ export class PieChart extends DataVis {
   }
 
   render() {
-    const size      = this.props.size,
-          className = this.props.className || ''
+    const size = this.props.size
 
     return (
       <svg width={size} height={size} viewBox="-1 -1 2 2"
-        {...this.inheritedProps()}>
+        {...this.getAllowedProps()}>
         {this.renderSectors()}
       </svg>
     )
   }
 }
 
+PieChart.defaultPropBlacklist = Object.assign(
+  {}, DataVis.defaultPropBlacklist, { size: true })
+
 PieChart.defaultProps = {
   size: 150
 }
 
 export class Sector extends DataVis {
-  getColorFunc() {
-    if (this.props.color) {
-      return this.makeValueGetter(this.props.color)
-    }
-
-    let hue = 0
-    const defaultColorFunc = i => {
-      const c = `hsl(${hue},100%,50%)`
-      hue = (hue + 257) % 360
-      return c
-    }
-
-    return defaultColorFunc
-  }
-
   pathStr(innerRadius, angle) {
     const largeArc = angle > Math.PI ? '1': '0',
           outerEnd = [Math.cos(angle), Math.sin(angle)],
@@ -75,18 +66,20 @@ export class Sector extends DataVis {
     return pathStr
   }
 
+  getPropBlacklist() {
+    return this.constructor.defaultPropBlacklist
+  }
+
   render() {
     let curOffset = 0
     const radius = this.props.radius,
           innerRadius = this.props.innerRadius / radius,
-          data = this.sortedByProp(this.filteredByProp(this.props.data)),
-          values = data.map(this.makeValueGetter(this.props.value)),
-          key = this.props.keyed
-                ? this.makeValueGetter(this.props.keyed)
-                : (m => d => m.get(d))(new WeakMap(data.map((d, i) => [d, i]))),
+          data = this.getData(),
+          values = this.getValuesFromData(data),
+          key = this.makeKeyGetter(),
           total = values.reduce((a, b) => a + b),
           fracs = values.map(v => v / total),
-          color = this.getColorFunc(),
+          color = this.getColorGetter(),
           twoPi = 2 * Math.PI,
           paths = data.map((d, i) => {
             const angleRads = twoPi * fracs[i],
@@ -96,7 +89,7 @@ export class Sector extends DataVis {
                            fill={color(d)}
                            key={key(d)}
                            transform={`rotate(${curOffset})`}
-                           {...this.inheritedProps()} />
+                           {...this.getAllowedProps()} />
 
             curOffset += angleDegs
             return path
@@ -105,6 +98,17 @@ export class Sector extends DataVis {
     return (<g>{paths}</g>)
   }
 }
+
+Sector.defaultPropBlacklist = Object.assign(
+  {},
+  DataVis.defaultPropBlacklist,
+  {
+    transform: true,
+    d: true,
+    fill: true,
+    innerRadius: true
+  }
+)
 
 Sector.defaultProps = {
   innerRadius: 0
