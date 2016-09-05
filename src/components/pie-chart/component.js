@@ -1,112 +1,112 @@
 import React from 'react'
 
-import DataVis from '../data-vis/component'
+import { Chart, ChartElement } from '../chart/component'
 
 import { observe, takeKeys } from '../../lib/func-util'
 import { vec } from '../../lib/matrix-util'
 
-export class PieChart extends DataVis {
-  getDefaultSector() {
-    return <Sector radius={this.props.size / 2} />
+export class PieChart extends Chart {
+  makeDefaultSector() {
+    const radius = this.props.size / 2
+    return <Sector
+             radius={radius}
+             origin={[radius, radius]} />
   }
 
-  getSectorElement() {
-    const sector = React.Children.toArray(this.props.children)
-      .filter(child => child.type === Sector)
-    
-    if (sector.length > 1) throw "Only one Sector definition per PieChart!"
-
-    return sector[0] || this.getDefaultSector()
+  getSector() {
+    return this.props.sector || this.makeDefaultSector()
   }
 
-  getPropBlacklist() {
-    return this.constructor.defaultPropBlacklist
-  }
+  makeChartElements() {
+    let offset = 0
+    const sector = this.getSector(),
+          data = this.getData(),
+          values = this.getValues(data),
+          getKey = this.makeKeyGetter(),
+          getColor = this.makeColorGetter(),
+          range = values.reduce((a, b) => a + b, 0)
 
-  renderSectors() {
-    const sectorElement = this.getSectorElement(),
-          data = this.sortedByProp(this.filteredByProp(this.props.data))
+    return data.map((datum, i) => {
+      const value = values[i],
+            clonedSector = React.cloneElement(
+              sector,
+              { datum, value, range,
+                offset, color: getColor(datum),
+                key: getKey(datum) }) 
 
-    return React.cloneElement(sectorElement, { data })
+      offset += values[i]
+
+      return clonedSector
+    })
   }
 
   render() {
-    const size = this.props.size
-
     return (
-      <svg width={size} height={size} viewBox="-1 -1 2 2"
-        {...this.getAllowedProps()}>
-        {this.renderSectors()}
+      <svg {...this.getPassedProps()}>
+        {this.makeChartElements()}
       </svg>
     )
   }
 }
 
-PieChart.defaultPropBlacklist = Object.assign(
-  {}, DataVis.defaultPropBlacklist, { size: true })
+Object.defineProperty(
+  PieChart.prototype,
+  'customPropsSet',
+  {
+    value: Object.freeze(new Set(['sector']))
+  }
+)
 
-PieChart.defaultProps = {
-  size: 150
-}
+const tau = Math.PI * 2
 
-export class Sector extends DataVis {
-  pathStr(innerRadius, angle) {
-    const largeArc = angle > Math.PI ? '1': '0',
-          outerEnd = [Math.cos(angle), Math.sin(angle)],
-          innerEnd = vec.scale(outerEnd, innerRadius),
-          [oeStr, ieStr] = [outerEnd, innerEnd].map(v => v.join(' ')),
-          pathStr = [
-            `M ${innerRadius} 0 L 1 0`,
-            `A 1 1 0 ${largeArc} 1 ${oeStr}`,
-            `L ${ieStr}`,
-            `A ${innerRadius} ${innerRadius}`,
-              `0 ${largeArc} 0 ${innerRadius} 0 Z`
-          ].join(' ')
+export class Sector extends ChartElement {
+  getOrigin() {
+    return this.props.origin || [this.props.radius, this.props.radius]
+  }
+
+  makePathStr() {
+    const { innerRadius, radius: outerRadius } = this.props,
+          origin      = this.getOrigin(),
+          total       = this.getRange(),
+          startAngle  = tau * (this.props.offset / total),
+          endAngle    = tau * (this.getValue() / total) + startAngle,
+          normStart   = [Math.cos(startAngle),
+                         Math.sin(startAngle)],
+          innerStart  = vec.scale(normStart, innerRadius),
+          outerStart  = vec.scale(normStart, outerRadius),
+          normEnd     = [Math.cos(endAngle),
+                         Math.sin(endAngle)],
+          innerEnd    = vec.scale(normEnd, innerRadius),
+          outerEnd    = vec.scale(normEnd, outerRadius),
+          points      = [innerStart, innerEnd, outerEnd, outerStart]
+            .map(v => vec.add(v, origin))
+            .map(v => v.join(' ')),
+          largeArc = endAngle - startAngle > Math.PI ? '1': '0',
+          pathStr = `\
+M ${points[0]} \
+A ${innerRadius} ${innerRadius} 0 ${largeArc} 1 ${points[1]} \
+L ${points[2]} \
+A ${outerRadius} ${outerRadius} 0 ${largeArc} 0 ${points[3]} Z`
 
     return pathStr
   }
 
-  getPropBlacklist() {
-    return this.constructor.defaultPropBlacklist
-  }
-
   render() {
-    let curOffset = 0
-    const radius = this.props.radius,
-          innerRadius = this.props.innerRadius / radius,
-          data = this.getData(),
-          values = this.getValuesFromData(data),
-          key = this.makeKeyGetter(),
-          total = values.reduce((a, b) => a + b),
-          fracs = values.map(v => v / total),
-          color = this.getColorGetter(),
-          twoPi = 2 * Math.PI,
-          paths = data.map((d, i) => {
-            const angleRads = twoPi * fracs[i],
-                  angleDegs = 360 * fracs[i],
-                  path = <path 
-                           d={this.pathStr(innerRadius, angleRads)}
-                           fill={color(d)}
-                           key={key(d)}
-                           transform={`rotate(${curOffset})`}
-                           {...this.getAllowedProps()} />
-
-            curOffset += angleDegs
-            return path
-          })
-
-    return (<g>{paths}</g>)
+    return (<path d={this.makePathStr()}
+              fill={this.props.color}
+              {...this.getPassedProps()} />)
   }
 }
 
-Sector.defaultPropBlacklist = Object.assign(
-  {},
-  DataVis.defaultPropBlacklist,
+Object.defineProperty(
+  Sector.prototype,
+  'customPropsSet',
   {
-    transform: true,
-    d: true,
-    fill: true,
-    innerRadius: true
+    value: Object.freeze(new Set([
+      'offset',
+      'radius',
+      'innerRadius'
+    ]))
   }
 )
 
