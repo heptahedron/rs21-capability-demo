@@ -1,13 +1,20 @@
 import React from 'react'
 
 import Chart from '../chart/component'
-import { PieChart, Sector } from '../pie-chart/component'
+import { PieChart, Sectors } from '../pie-chart/component'
+
+import { observe } from '../../lib/func-util'
 
 import styles from './styles.css'
 
 export default class FbPlaceVis extends React.Component {
   constructor(props) {
     super(props)
+    this.sectorDataMap = null
+  }
+
+  handleSectorMouseOver(e) {
+    console.log(this.sectorDataMap.get(e.target))
   }
 
   makeChart() {
@@ -15,18 +22,26 @@ export default class FbPlaceVis extends React.Component {
       return null
     }
 
-    const radius = 75,
-          sector = <Sector radius={radius} innerRadius={radius*3/4} />
+    const radius = 75
 
     return (
       <PieChart
           width={radius*2} height={radius*2}
           data={this.props.data.properties.placeTypes}
-          valued="nCheckins"
-          sorted="nCheckins"
-          keyed="typeStr"
-          sector={sector}
-          className={styles.placeChart} />
+          valued={['typeStr', 'nCheckins']}
+          className={styles.placeChart}>
+        <Sectors
+          radii={radius} innerRadii={radius*3/4}
+          valued={1}
+          sorted={1}
+          keyed={0}
+          ref={sectors => {
+            if (sectors) {
+              this.sectorDataMap = sectors.sectorDataMap
+            }
+          }}
+          onMouseOver={e => this.handleSectorMouseOver(e)} />
+      </PieChart>
     )
   }
 

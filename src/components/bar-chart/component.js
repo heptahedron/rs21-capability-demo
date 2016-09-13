@@ -2,20 +2,11 @@ import React from 'react'
 
 import Chart from '../chart/component'
 
+import { vec, mat } from '../../lib/matrix-util'
+
 export class BarChart extends Chart {
-  getDefaultBarElement() {
+  makeDefaultBar() {
     return <Bar />
-  }
-
-  getBarElement() {
-    const barElement = React.Children.toArray(this.props.children)
-      .filter(child => child.type === Bar)
-
-    if (barElement.length > 0) {
-      throw "Only one Bar element per BarChart!"
-    }
-
-    return barElement[0] || this.getDefaultBarElement()
   }
 
   makeBars() {
@@ -40,32 +31,53 @@ export class BarChart extends Chart {
   }
 }
 
-BarChart.prototype.propMask = Object.assign(
-  {},
-  Chart.prototype.propMask,
+Object.defineProperty(
+  BarChart.prototype,
+  'customPropsSet',
   {
-    width: true,
-    height: true
+    value: Object.freeze(new Set(['']))
   }
 )
 
-export class Bar extends Chart {
-  render() {
-    const { x, y, width, height } = this.props
+export class MultiAxisChart extends Chart {
+  getDefaultOrigin(ranges) {
+    return Math.max(ranges[1][1], 0)
+  }
+  
+  getOrigin() {
+    return this.props.origin || [0, this.props.height]
+  }
 
+  makeCoordTransform() {
+    return v => {
+      if 
+    }
+  }
+
+  makeAxes() {
+
+  }
+
+  render() {
     return (
-      <rect 
-        x={x} y={y}
-        width={width} height={height}
-        {...this.getPassedProps()} />
+      <g>{this.makeAxes()}</g>
     )
   }
 }
 
-Bar.prototype.propMask = Object.assign(
-  {},
-  Chart.prototype.propMask,
+Object.defineProperties(
+  Axes.prototype,
   {
-    
+    customPropsSet: {
+      value: Object.freeze(new Set([
+        'origin', 'flipped' 
+      ]))
+    },
+    chartProps: {
+      value: Object.freeze(Object.assign({
+        xProp: 'xValue',
+        yProp: 'yValue'
+      }, Chart.prototype.chartProps))
+    }
   }
 )

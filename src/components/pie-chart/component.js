@@ -7,45 +7,18 @@ import { vec } from '../../lib/matrix-util'
 
 export class PieChart extends Chart {
   makeDefaultSector() {
-    const radius = this.props.size / 2
-    return <Sector
-             radius={radius}
-             origin={[radius, radius]} />
-  }
-
-  getSector() {
-    return this.props.sector || this.makeDefaultSector()
-  }
-
-  makeChartElements() {
-    let offset = 0
-    const sector = this.getSector(),
-          data = this.getData(),
-          values = this.getValues(data),
-          getKey = this.makeKeyGetter(),
-          getColor = this.makeColorGetter(),
-          range = values.reduce((a, b) => a + b, 0)
-
-    return data.map((datum, i) => {
-      const value = values[i],
-            clonedSector = React.cloneElement(
-              sector,
-              { datum, value, range,
-                offset, color: getColor(datum),
-                key: getKey(datum) }) 
-
-      offset += values[i]
-
-      return clonedSector
-    })
+    const radius = Math.min(this.props.width, this.props.height) / 2
+    return <Sectors
+             radii={radius}
+             origin={[this.props.width / 2, this.props.height / 2]} />
   }
 
   render() {
-    return (
-      <svg {...this.getPassedProps()}>
-        {this.makeChartElements()}
-      </svg>
-    )
+    if (React.Children.count(this.props.children) === 0) {
+      return this.makeDefaultSector()
+    } else {
+      return super.render()
+    }
   }
 }
 
@@ -53,24 +26,26 @@ Object.defineProperty(
   PieChart.prototype,
   'customPropsSet',
   {
-    value: Object.freeze(new Set(['sector']))
+    value: Object.freeze(new Set([]))
   }
 )
 
 const tau = Math.PI * 2
 
-export class Sector extends ChartElement {
-  getOrigin() {
-    return this.props.origin || [this.props.radius, this.props.radius]
+export class Sectors extends Chart {
+  constructor(props) {
+    super(props)
+    this.sectorDataMap = new WeakMap()
   }
 
-  makePathStr() {
-    const { innerRadius, radius: outerRadius } = this.props,
-          origin      = this.getOrigin(),
-          total       = this.getRange(),
-          startAngle  = tau * (this.props.offset / total),
-          endAngle    = tau * (this.getValue() / total) + startAngle,
-          normStart   = [Math.cos(startAngle),
+  getOrigin() {
+    return this.props.origin || [this.props.radii, this.props.radii]
+  }
+
+  makePath(innerRadius, outerRadius,
+           startAngle, endAngle,
+           origin, passedProps, datum) {
+    const normStart   = [Math.cos(startAngle),
                          Math.sin(startAngle)],
           innerStart  = vec.scale(normStart, innerRadius),
           outerStart  = vec.scale(normStart, outerRadius),
@@ -88,28 +63,61 @@ A ${innerRadius} ${innerRadius} 0 ${largeArc} 1 ${points[1]} \
 L ${points[2]} \
 A ${outerRadius} ${outerRadius} 0 ${largeArc} 0 ${points[3]} Z`
 
-    return pathStr
+    return (
+      <path d={pathStr} {...passedProps}
+        ref={sector => this.sectorDataMap.set(sector, datum)} />
+    )
+  }
+
+  makeSectors() {
+    let offset = 0
+    const { innerRadii: innerRadius, radii: outerRadius } = this.props,
+          origin      = this.getOrigin(),
+          data        = this.getData(),
+          values      = this.getValues(data),
+          total       = values.reduce((a, b) => a + b, 0),
+          getKey      = this.makeKeyGetter(),
+          getColor    = this.makeColorGetter(),
+          passedProps = this.getPassedProps()
+
+    return data.map((datum, i) => {
+      const startAngle  = tau * (offset / total),
+            endAngle    = tau * (values[i] / total) + startAngle,
+            pathProps   = Object.assign(
+                            { key: getKey(datum), fill: getColor(datum) },
+                            passedProps),
+            sector      = this.makePath(
+                            innerRadius, outerRadius,
+                            startAngle, endAngle,
+                            origin, pathProps, datum)
+
+      offset += values[i]
+
+      return sector
+    })
   }
 
   render() {
-    return (<path d={this.makePathStr()}
-              fill={this.props.color}
-              {...this.getPassedProps()} />)
+    return (
+      <g>
+        {this.makeSectors()}
+      </g>
+    )
   }
 }
 
 Object.defineProperty(
-  Sector.prototype,
+  Sectors.prototype,
   'customPropsSet',
   {
     value: Object.freeze(new Set([
-      'offset',
-      'radius',
-      'innerRadius'
+      'origin',
+      'radii',
+      'innerRadii'
     ]))
   }
 )
 
-Sector.defaultProps = {
-  innerRadius: 0
+Sectors.defaultProps = {
+  innerRadii: 0
 }

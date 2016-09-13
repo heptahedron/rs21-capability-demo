@@ -28,6 +28,11 @@ export const vec = {
       return Math.pow(v.map(vi => Math.pow(vi, p))
         .reduce((vi, vj) => vi + vj), 1/p)
     }
+  },
+  normalize(v, p=2, w=vec.empty(v.length)) {
+    const norm = vec.norm(v, p)
+    w.forEach((_, i) => w[i] = v[i] / norm)
+    return w
   }
 }
 

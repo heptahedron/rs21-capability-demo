@@ -5,16 +5,30 @@ import { observe, takeKeys, transformProps } from '../../lib/func-util'
 const cacheKey = Symbol()
 export class Chart extends React.Component {
   makeValueGetter(_prop) {
-    if (typeof _prop === 'string'
-        || typeof _prop === 'number') {
-      return data => data[_prop]
-    } else if (Array.isArray(_prop) && _prop.length >= 1) {
-      if (_prop.length === 1){
-        return this.makeValueGetter(_prop[0])
+    if (typeof _prop === 'string') {
+      let p
+      const restIdx = _prop.search(/\w\.\w/) + 2
+      if (restIdx !== 1) { // split found
+        const deeperGetter = this.makeValueGetter(_prop.substr(restIdx)),
+        p = _prop.substr(0, restIdx - 2).replace('..', '.')
+
+        return data => (deeperGetter(data)[p])
       } 
 
-      const deeperGetter = this.makeValueGetter(_prop.slice(1))
-      return data => deeperGetter(data[_prop[0]])
+      p = _prop.replace('..', '.')
+
+      return data => data[p]
+    } else if (typeof _prop === 'number') {
+      return data => data[_prop]
+    } else if (Array.isArray(_prop)) {
+      const dim = _prop.length,
+            getters = _prop.map(p => this.makeValueGetter(p))
+
+      return data => {
+        let output = vec.empty(dim)
+        output.forEach((_, i) => output[i] = getters[i](data))
+        return output
+      }
     } else if (typeof _prop === 'function') {
       return data => _prop(data)
     } 
@@ -69,41 +83,6 @@ export class Chart extends React.Component {
     }
   }
 
-  sortedByProp(data,
-               sortProp=this.chartProps.sortProp,
-               descProp=this.chartProps.descProp) {
-    if (this.props[sortProp]) {
-      return data.slice()
-        .sort(this.makeComparator(this.props[sortProp], this.props[descProp]))
-    }
-
-    return data
-  }
-
-  filteredByProp(data, filterProp=this.chartProps[filterProp]) {
-    if (this.props[filterProp]) {
-      return data.filter(this.makeFilter(this.props[filterProp]))
-    }
-
-    return data
-  }
-
-  valuedByProp(data, valuatorProp=this.chartProps.valuatorProp) {
-    if (this.props[valuatorProp]) {
-      return data.map(this.makeValueGetter(this.props[valuatorProp]))
-    }
-    
-    return data
-  }
-
-  getData(dataProp=this.chartProps.dataProp) {
-    return this.sortedByProp(this.filteredByProp(this.props[dataProp]))
-  }
-
-  getValues(data=this.getData()) {
-    return this.valuedByProp(data)
-  }
-
   makeKeyGetter(keyProp=this.chartProps.keyProp) {
     if (this.props[keyProp]) {
       return this.makeValueGetter(this.props[keyProp])
@@ -134,6 +113,78 @@ export class Chart extends React.Component {
                  : colorMap.set(d, genColor()).get(d))
   }
 
+  sortedByProp(data,
+               sortProp=this.chartProps.sortProp,
+               descProp=this.chartProps.descProp) {
+    if (this.props[sortProp]) {
+      return data.slice()
+        .sort(this.makeComparator(this.props[sortProp], this.props[descProp]))
+    }
+
+    return data
+  }
+
+  filteredByProp(data, filterProp=this.chartProps[filterProp]) {
+    if (this.props[filterProp]) {
+      return data.filter(this.makeFilter(this.props[filterProp]))
+    }
+
+    return data
+  }
+
+  valuedByProp(data, valuatorProp=this.chartProps.valuatorProp) {
+    if (this.props[valuatorProp]) {
+      const valueGetter = this.makeValueGetter(this.props[valuatorProp])
+      return data.map(valueGetter)
+    }
+    
+    return data
+  }
+
+  getData(dataProp=this.chartProps.dataProp) {
+    return this.sortedByProp(this.filteredByProp(this.props[dataProp]))
+  }
+
+  getValues(data=this.getData()) {
+    return this.valuedByProp(data)
+  }
+
+  getDimension(values) {
+    return values[0].length
+  }
+
+  getRange(values=this.getValues()) {
+    let range = vec.zeros(2)
+    values.forEach(v => {
+      if (v < range[0]) {
+        range[0] = v
+      } else if (v > range[1]) {
+        range[1] = v
+      }
+    })
+  }
+
+  getRanges(values=this.getValues(), dim=this.getDimension(values)) {
+    let ranges = mat.zeros(dim, 2)
+
+    ranges.forEach((range, i) => {
+      if (typeof values[0][i] === 'string') {
+        ranges[i] = new Set(values.map(v => v[i]))
+        return
+      }
+
+      values.forEach(v => {
+        if (v[i] < range[0]) {
+          range[0] = v[i]
+        } else if (v[i] > range[1]) {
+          range[1] = v[i]
+        }
+      })
+    })
+
+    return ranges
+  }
+
   getPassedProps() {
     return takeKeys(
       this.props,
@@ -142,14 +193,19 @@ export class Chart extends React.Component {
                 || this.reactPropsSet.has(prop)))
   }
 
-  makeChartElements() {
-    return null
+  passData(child) {
+    return React.cloneElement(child, { data: this.getValues() })
   }
 
   render() {
-    <svg {...this.getPassedProps()}>
-      {this.makeChartElements()}
-    </svg>
+    const children = React.Children.toArray(this.props.children),
+          passedProps = this.getPassedProps()
+
+    return (
+      <svg {...passedProps}>
+        {children.map(child => this.passData(child))}
+      </svg>
+    )
   }
 
   get chartPropsSet() {
